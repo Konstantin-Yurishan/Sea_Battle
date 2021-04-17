@@ -11,14 +11,29 @@
 // возможность паузы,завершения и новой игры
 //TODO запись статистики по играм
 // TODO цветная карта, звуковая индикация попадания
+// TODO туман войны
 
 
 #include <iostream>
 #include <string>
+#include <Windows.h>
 
-void showField(std::string**, std::string**);
-void fillBackgroundField(std::string**);
+struct playerField {
 
+	int ship1 = 0;
+	int ship2 = 0;
+	int ship3 = 0;
+	int ship4 = 0;
+
+	char** field;
+
+};
+
+
+playerField createPlayerField();
+void showField(playerField, playerField);	//	показ игровых полей
+void fillFieldManual(playerField*);	//	заполнение поля в ручном режиме
+void fillFieldAutomatic(playerField*);	//	заполнение поля в автоматическом режиме
 
 //TODO Fзаполнение поля кораблями в автоматическом режиме
 //TODO Fзаполнение поля кораблями в ручном режиме игроком
@@ -34,65 +49,112 @@ void fillBackgroundField(std::string**);
 
 int main()
 {
+	srand(time(NULL));
 
-	std::string** field1 = new std::string * [10];
-	std::string** field2 = new std::string * [10];
+	playerField field1 = createPlayerField();
+	playerField* ptrField1 = &field1;
+	playerField field2 = createPlayerField();
+	playerField* ptrField2 = &field2;
 
-	for (int i = 0; i < 10; i++)
-	{
-		field1[i] = new std::string[10];
-		field2[i] = new std::string[10];
-	}
 
-	fillBackgroundField(field1);
-	fillBackgroundField(field2);
-
+	fillFieldAutomatic(ptrField1);
+	fillFieldAutomatic(ptrField2);
+	
+	
 	showField(field1, field2);
+
+
 
 	return 0;
 }
 
-
-void fillBackgroundField(std::string** field)
+playerField createPlayerField()
 {
+	playerField newField;
 
-	for (int i = 0; i < 10; i++)
-	{
-		for (int c = 0; c < 10; c++)
-		{
-			field[i][c] = "~";
+	newField.field = new char* [10];
+	
+	for (int i = 0; i < 10; i++) {
+		newField.field[i] = new char[10];
+	}
+
+	for (int i = 0; i < 10; i++) {
+		for (int c = 0; c < 10; c++) {
+			newField.field[i][c] = '~';
 		}
 	}
+
+	return newField;
 }
+
 
 //показ обоих полей
-void showField(std::string** field1, std::string** field2)
+void showField(playerField field1, playerField field2)
 {
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
-	std::cout << "  ABCDEFGHIJ\t  ABCDEFGHIJ" << std::endl;
-	for (int i = 0; i < 10; i++)
-	{
+	std::cout << "  A  B  C  D  E  F  G  H  I  J \t\t  A  B  C  D  E  F  G  H  I  J " << std::endl;
+	for (int i = 0; i < 10; i++) {
 		std::cout << i + 1;
-		for (int c = 0; c < 10; c++)
-		{
-			std::cout << field1[i][c];
+		if (i != 9) std::cout << " ";
+
+		for (int c = 0; c < 10; c++) {
+			SetConsoleTextAttribute(hConsole, 3);
+			std::cout << field1.field[i][c] << "  ";
 		}
+
+		SetConsoleTextAttribute(hConsole, 7);
 		std::cout << "\t";
 		std::cout << i + 1;
-		for (int c = 0; c < 10; c++)
-		{
-			std::cout << field2[i][c];
+		if (i != 9) std::cout << " ";
+
+		for (int c = 0; c < 10; c++) {
+			SetConsoleTextAttribute(hConsole, 3);
+			std::cout << field2.field[i][c] << "  ";
 		}
-		std::cout << std::endl;
+		std::cout << std::endl << std::endl;
+
+		SetConsoleTextAttribute(hConsole, 7);
 	}
 
-	//показ статистики: количество кораблей наших и противника
-	//номер хода
-	//время игры
-	//чей ход в данный момент
-	//показать горячии клавиши для выхода из игры и выхода в главное меню
+	//	TODO вывод информации по количеству кораблей
+	//	TODO вывод информации с номером хода
+	//	TODO вывод информации с временем игры ? (время нельзя показать в реальном времени)
+	//	TODO вывод информации об очерёдности хода
+	//	TODO вывод информации о горячих клавишах
 
 }
 
+//	заполнение поля в ручном режиме
+void fillFieldManual(playerField* field)
+{
+
+}
+
+//	заполнение поля в автоматическом режиме
+void fillFieldAutomatic(playerField* field1)
+{
+	
+
+	int ship = 4;
+	int coordX = 1, coordY = 4;
+
+
+	while (ship != 0) {
+
+		coordX = rand() % 9 + 1;
+		coordY = rand() % 9 + 1;
+		// TODO проверка окресности точки
+		if (field1->field[coordX][coordY] == '~') {
+			field1->field[coordX][coordY] = '#';
+			ship--;
+		}
+
+	}
+	
+	
+
+
+}
 
 
