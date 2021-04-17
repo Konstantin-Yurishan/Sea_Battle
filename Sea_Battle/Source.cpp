@@ -1,340 +1,98 @@
-//+заполнение вражеского поля кораблями
-//меню для ввода информации с подсказками
-//заполнение поля игрока кораблями путём ввода координат кораблей
-//проверка корректности ввода координат и размещения кораблей игроком 
-//реализация ии для хода компьютера
-//реализация хода игрока и компьютера поочерёдно
-//реализация режима тумана войны
-//проверка попал или нет игрок или компютер
-//сигнализация попадания цветом и звуком
-//включение бегущей строки с докладом боевой обстановки
-//проверка состояния игры (выйграл/проиграл)
-//реализация таймера хода игрока 
+// TODO режимы игры
+//человек - комп
+//комп - комп
+//Расстановка кораблей:
+//игрок - сам
+//комп за игрока
+//комп играет в 2 режиммах:
+// 1. случайный выстрел
+//2. стратегия
+// отображение тек состояния
+// возможность паузы,завершения и новой игры
+//TODO запись статистики по играм
+// TODO цветная карта, звуковая индикация попадания
+
 
 #include <iostream>
 #include <string>
-#include <Windows.h>
-#include <random>
 
-void TextRunner();
-void CreateField();
-void ShowField();
-void AIShipConstructor();
-bool ClearShipFieldChecker(int, int);
-bool menu();
-void playerShipPlacer();
+void showField(std::string**, std::string**);
+void fillBackgroundField(std::string**);
 
-char mineField[12][12] = { 0, };
-char enemyField[12][12] = { 0, };
 
-int main() {
-	setlocale(LC_ALL, "Russian");
+//TODO Fзаполнение поля кораблями в автоматическом режиме
+//TODO Fзаполнение поля кораблями в ручном режиме игроком
+//TODO Fзапрос на выстрел
+//TODO Fвыстрел компьютера в рандомном режиме
+//TODO Fвыстрел компьютера в интеллектуальном режиме
+//TODO Fпроверка очерёдности хода
+//TODO Fпроверка результативности выстрела
+//TODO Fструктура для полей (поле, количество кораблей по классам, количество потопленных)
+//TODO Fглавное меню
+//TODO Fвывод статистики? -> встраивание в показ полей
 
-	srand(time(NULL));
-	//TextRunner();
-	if (menu()) {
-		system("CLS");
-		CreateField();
-		AIShipConstructor();
-		ShowField();
-		playerShipPlacer();
+
+int main()
+{
+
+	std::string** field1 = new std::string * [10];
+	std::string** field2 = new std::string * [10];
+
+	for (int i = 0; i < 10; i++)
+	{
+		field1[i] = new std::string[10];
+		field2[i] = new std::string[10];
 	}
+
+	fillBackgroundField(field1);
+	fillBackgroundField(field2);
+
+	showField(field1, field2);
+
 	return 0;
 }
 
 
-void TextRunner() {
+void fillBackgroundField(std::string** field)
+{
 
-	std::string str = "Sea Battle   ";
-
-	while (true) {//бесконечный цикл
-		for (int i = 0; i < str.length(); i++) {//задаем начальную позицию для части бег строки
-			for (int c = i; c <= i + 5; c++) {//задаем с какого до какого символа выводим в единицу frame
-				std::cout << str.at(c % str.length());//вывод символа по индексу равному c ,в том момент когда индекс выходит за пределы массива она пропадает
-			}
-			Sleep(100);//frame
-			system("CLS");
-
-		}
-
-	}
-
-}
-
-void CreateField() {
-
-	for (int i = 0; i < 12; i++) {
-		for (int c = 0; c < 12; c++) {
-            if (c == 0 || c == 11 || i == 0 || i == 11) {
-				mineField[i][c] = '#';
-				enemyField[i][c] = '#';
-			} else {
-				mineField[i][c] = ' ';
-				enemyField[i][c] = ' ';
-			}
+	for (int i = 0; i < 10; i++)
+	{
+		for (int c = 0; c < 10; c++)
+		{
+			field[i][c] = "~";
 		}
 	}
 }
 
-void ShowField() {
+//показ обоих полей
+void showField(std::string** field1, std::string** field2)
+{
 
-	std::cout << "   ABCDEFGHIJ \t\t   ABCDEFGHIJ" << std::endl;
-
-	for (int i = 0, g = -1; i < 12; i++, g++) {
-		if (i != 0 && g < 10) {
-			std::cout << g << " ";
+	std::cout << "  ABCDEFGHIJ\t  ABCDEFGHIJ" << std::endl;
+	for (int i = 0; i < 10; i++)
+	{
+		std::cout << i + 1;
+		for (int c = 0; c < 10; c++)
+		{
+			std::cout << field1[i][c];
 		}
-		if (i == 0 || i == 11) {
-			std::cout << "  ";
+		std::cout << "\t";
+		std::cout << i + 1;
+		for (int c = 0; c < 10; c++)
+		{
+			std::cout << field2[i][c];
 		}
-
-		for (int c = 0; c < 12; c++) {
-			std::cout << mineField[i][c];
-		}
-
-		std::cout << "\t\t";
-
-		if (i != 0 && g < 10) {
-			std::cout << g << " ";
-		}
-		if (i == 0 || i == 11) {
-			std::cout << "  ";
-		}
-
-		for (int c = 0; c < 12; c++) {
-			std::cout << enemyField[i][c];
-		}
-
 		std::cout << std::endl;
 	}
-}
 
-void AIShipConstructor() {
-
-	//однопалубные
-	char ship1_1[2];
-	char ship1_2[2];
-	char ship1_3[2];
-	char ship1_4[2];
-
-	//двухпалубные
-	char ship2_1[4];
-	char ship2_2[4];
-	char ship2_3[4];
-
-	//трехпалубные
-	char ship3_1[6];
-	char ship3_2[6];
-
-	//4палубный
-	char ship4_1[8];
-
-
-	int ship = 0;
-	int coordI = 0;
-	int coordC = 0;
-	int direction = 0;
-
-	//заполняем поле однопалубниками
-
-	while (ship < 4) {
-		coordI = rand() % 10 + 1;
-		coordC = rand() % 10 + 1;
-
-		if (ClearShipFieldChecker(coordI, coordC)) {
-			enemyField[coordI][coordC] = '*';
-			ship++;
-		}
-	}
-
-	//заполняем поле двухпалубниками
-	ship = 0;
-	
-	while (ship < 3) {
-		coordI = rand() % 10 + 1;
-		coordC = rand() % 10 + 1;
-
-		if (ClearShipFieldChecker(coordI, coordC)) {
-			direction = rand() % 4;
-
-			if (direction == 0) { //вверх
-				if (enemyField[coordI - 1][coordC] != '#' && ClearShipFieldChecker(coordI - 1, coordC)) {
-					enemyField[coordI - 1][coordC] = '*';
-					enemyField[coordI][coordC] = '*';
-					ship++;
-				}
-			}
-			else if (direction == 1) { //вниз
-				if (enemyField[coordI + 1][coordC] != '#' && ClearShipFieldChecker(coordI + 1, coordC)) {
-					enemyField[coordI + 1][coordC] = '*';
-					enemyField[coordI][coordC] = '*';
-					ship++;
-				}
-			}
-			else if (direction == 2) { //влево
-				if (enemyField[coordI][coordC - 1] != '#' && ClearShipFieldChecker(coordI, coordC - 1)) {
-					enemyField[coordI][coordC - 1] = '*';
-					enemyField[coordI][coordC] = '*';
-					ship++;
-				}
-			}
-			else { //вправо
-				if (enemyField[coordI][coordC + 1] != '#' && ClearShipFieldChecker(coordI, coordC + 1)) {
-					enemyField[coordI][coordC + 1] = '*';
-					enemyField[coordI][coordC] = '*';
-					ship++;
-				}
-			}
-		}
-	}
-
-	//заполняем поле трёхпалубниками
-	ship = 0;
-
-	while (ship < 2) {
-		coordI = rand() % 10 + 1;
-		coordC = rand() % 10 + 1;
-
-		if (ClearShipFieldChecker(coordI, coordC)) {
-			direction = rand() % 4;
-
-			if (direction == 0) { //вверх
-				if (enemyField[coordI - 1][coordC] != '#' && enemyField[coordI - 2][coordC] != '#' && ClearShipFieldChecker(coordI - 1, coordC) && ClearShipFieldChecker(coordI - 2, coordC)) {
-					enemyField[coordI - 2][coordC] = '*';
-					enemyField[coordI - 1][coordC] = '*';
-					enemyField[coordI][coordC] = '*';
-					ship++;
-				}
-			}
-			else if (direction == 1) { //вниз
-				if (enemyField[coordI + 1][coordC] != '#' && enemyField[coordI + 2][coordC] != '#' && ClearShipFieldChecker(coordI + 1, coordC) && ClearShipFieldChecker(coordI + 2, coordC)) {
-					enemyField[coordI + 2][coordC] = '*';
-					enemyField[coordI + 1][coordC] = '*';
-					enemyField[coordI][coordC] = '*';
-					ship++;
-				}
-			}
-			else if (direction == 2) { //влево
-				if (enemyField[coordI][coordC - 1] != '#' && enemyField[coordI][coordC - 2] != '#' && ClearShipFieldChecker(coordI, coordC - 1) && ClearShipFieldChecker(coordI, coordC - 2)) {
-					enemyField[coordI][coordC - 2] = '*';
-					enemyField[coordI][coordC - 1] = '*';
-					enemyField[coordI][coordC] = '*';
-					ship++;
-				}
-			}
-			else { //вправо
-				if (enemyField[coordI][coordC + 1] != '#' && enemyField[coordI][coordC + 2] != '#' && ClearShipFieldChecker(coordI, coordC + 1) && ClearShipFieldChecker(coordI, coordC + 2)) {
-					enemyField[coordI][coordC + 2] = '*';
-					enemyField[coordI][coordC + 1] = '*';
-					enemyField[coordI][coordC] = '*';
-					ship++;
-				}
-			}
-		}
-
-	}
-
-	//заполняем поле четёрёхпалубником
-	ship = 0;
-
-	while (ship < 1) {
-		coordI = rand() % 10 + 1;
-		coordC = rand() % 10 + 1;
-
-		if (ClearShipFieldChecker(coordI, coordC)) {
-			direction = rand() % 4;
-
-			if (direction == 0) { //вверх
-				if (enemyField[coordI - 1][coordC] != '#' && enemyField[coordI - 2][coordC] != '#' && enemyField[coordI - 3][coordC] != '#' 
-					&& ClearShipFieldChecker(coordI - 1, coordC) && ClearShipFieldChecker(coordI - 2, coordC) && ClearShipFieldChecker(coordI - 3, coordC)) {
-					enemyField[coordI - 3][coordC] = '*';
-					enemyField[coordI - 2][coordC] = '*';
-					enemyField[coordI - 1][coordC] = '*';
-					enemyField[coordI][coordC] = '*';
-					ship++;
-				}
-			}
-			else if (direction == 1) { //вниз
-				if (enemyField[coordI + 1][coordC] != '#' && enemyField[coordI + 2][coordC] != '#' && enemyField[coordI + 3][coordC] != '#'
-					&& ClearShipFieldChecker(coordI + 1, coordC) && ClearShipFieldChecker(coordI + 2, coordC) && ClearShipFieldChecker(coordI + 3, coordC)) {
-					enemyField[coordI + 3][coordC] = '*';
-					enemyField[coordI + 2][coordC] = '*';
-					enemyField[coordI + 1][coordC] = '*';
-					enemyField[coordI][coordC] = '*';
-					ship++;
-				}
-			}
-			else if (direction == 2) { //влево
-				if (enemyField[coordI][coordC - 1] != '#' && enemyField[coordI][coordC - 2] != '#' && enemyField[coordI][coordC - 3] != '#' 
-					&& ClearShipFieldChecker(coordI, coordC - 1) && ClearShipFieldChecker(coordI, coordC - 2) && ClearShipFieldChecker(coordI, coordC - 3)) {
-					enemyField[coordI][coordC - 3] = '*';
-					enemyField[coordI][coordC - 2] = '*';
-					enemyField[coordI][coordC - 1] = '*';
-					enemyField[coordI][coordC] = '*';
-					ship++;
-				}
-			}
-			else { //вправо
-				if (enemyField[coordI][coordC + 1] != '#' && enemyField[coordI][coordC + 2] != '#' && enemyField[coordI][coordC + 3] != '#' 
-					&& ClearShipFieldChecker(coordI, coordC + 1) && ClearShipFieldChecker(coordI, coordC + 2) && ClearShipFieldChecker(coordI, coordC + 3)) {
-					enemyField[coordI][coordC + 3] = '*';
-					enemyField[coordI][coordC + 2] = '*';
-					enemyField[coordI][coordC + 1] = '*';
-					enemyField[coordI][coordC] = '*';
-					ship++;
-				}
-			}
-		}
-
-	}
-}
-
-bool ClearShipFieldChecker(int i, int c) {
-	for (int i1 = i - 1; i1 <= i + 1; i1++) {
-		for (int c1 = c - 1; c1 <= c + 1; c1++) {
-			if (enemyField[i1][c1] == '*') {
-				return false;
-			}
-			else {
-				true;
-			}	
-		}
-	}
-}
-
-bool menu() {
-
-	int n;
-	std::cout << "1.Start new game." << std::endl;
-	std::cout << "2.Exit." << std::endl;
-	std::cin >> n;
-    
-	if (n == 1) {
-		return true;
-	}
-	else {
-		return false;
-	}
+	//показ статистики: количество кораблей наших и противника
+	//номер хода
+	//время игры
+	//чей ход в данный момент
+	//показать горячии клавиши для выхода из игры и выхода в главное меню
 
 }
 
-void playerShipPlacer() {
 
-	int ship = 1;
-	int firstCoordI = 0;
-	int firstCoordC = 0;
 
-	while (ship < 5) {
-		system("CLS");
-		ShowField();
-		std::cout << "Enter coordinate Y " << ship << " ship: ";
-		std::cin >> firstCoordI;
-		std::cout << "Enter coordinate X " << ship << " ship: ";
-		std::cin >> firstCoordC;
-		std::cout << std::endl;
-		mineField[firstCoordI][firstCoordC] = '*';
-		
-		ship++;
-	}
-
-}
