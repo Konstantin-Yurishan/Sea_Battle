@@ -168,8 +168,8 @@ void fillFieldAutomatic(playerField* field1)
 void intro()
 {
 	std::thread thr(musicThread);
-	//thr.join();
-	//std::this_thread::yield();
+	thr.join();
+	std::this_thread::yield();
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
 	std::string logo[19] = { "\n\n                               $$$$$$$$\\ $$$$$$$\\ $$$$$$\\  $$$$$$\\                              ",
