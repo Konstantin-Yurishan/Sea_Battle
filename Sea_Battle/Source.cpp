@@ -17,6 +17,8 @@
 #include <iostream>
 #include <string>
 #include <Windows.h>
+#include <thread>
+#pragma comment(lib, "winmm.lib")
 
 struct playerField {
 
@@ -34,6 +36,10 @@ playerField createPlayerField();
 void showField(playerField, playerField);	//	показ игровых полей
 void fillFieldManual(playerField*);	//	заполнение поля в ручном режиме
 void fillFieldAutomatic(playerField*);	//	заполнение поля в автоматическом режиме
+void intro();
+void musicThread();
+void consoleSize();
+
 
 //TODO Fзаполнение поля кораблями в автоматическом режиме
 //TODO Fзаполнение поля кораблями в ручном режиме игроком
@@ -49,7 +55,10 @@ void fillFieldAutomatic(playerField*);	//	заполнение поля в ав�
 
 int main()
 {
+	consoleSize();
 	srand(time(NULL));
+
+	intro();
 
 	playerField field1 = createPlayerField();
 	playerField* ptrField1 = &field1;
@@ -60,9 +69,7 @@ int main()
 	fillFieldAutomatic(ptrField1);
 	fillFieldAutomatic(ptrField2);
 	
-	
 	showField(field1, field2);
-
 
 
 	return 0;
@@ -155,6 +162,87 @@ void fillFieldAutomatic(playerField* field1)
 	
 
 
+}
+
+// TODO сделать прерывание при нажатии любой клавиши
+void intro()
+{
+	std::thread thr(musicThread);
+	//thr.join();
+	//std::this_thread::yield();
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	std::string logo[19] = { "\n\n                               $$$$$$$$\\ $$$$$$$\\ $$$$$$\\  $$$$$$\\                              ",
+							"                               $$  _____|$$  __$$\\\\_$$  _|$$  __$$\\                             ",
+							"                               $$ |      $$ |  $$ | $$ |  $$ /  \\__|                            ",
+							"                               $$$$$\\    $$$$$$$  | $$ |  $$ |                                  ",
+							"                               $$  __|   $$  ____/  $$ |  $$ |                                  ",
+							"                               $$ |      $$ |       $$ |  $$ |  $$\\                             ",
+							"                               $$$$$$$$\\ $$ |     $$$$$$\\ \\$$$$$$  |                            ",
+							"                               \\________|\\__|     \\______| \\______/                             ",
+							"",
+							"",
+							"",
+							"  $$$$$$\\  $$$$$$$$\\  $$$$$$\\        $$$$$$$\\   $$$$$$\\ $$$$$$$$\\ $$$$$$$$\\ $$\\       $$$$$$$$\\ ",
+							" $$  __$$\\ $$  _____|$$  __$$\\       $$  __$$\\ $$  __$$\\\\__$$  __|\\__$$  __|$$ |      $$  _____|",
+							" $$ /  \\__|$$ |      $$ /  $$ |      $$ |  $$ |$$ /  $$ |  $$ |      $$ |   $$ |      $$ |      ",
+							" \\$$$$$$\\  $$$$$\\    $$$$$$$$ |      $$$$$$$\\ |$$$$$$$$ |  $$ |      $$ |   $$ |      $$$$$\\    ",
+							"  \\____$$\\ $$  __|   $$  __$$ |      $$  __$$\\ $$  __$$ |  $$ |      $$ |   $$ |      $$  __|   ",
+							" $$\\   $$ |$$ |      $$ |  $$ |      $$ |  $$ |$$ |  $$ |  $$ |      $$ |   $$ |      $$ |      ",
+							" \\$$$$$$  |$$$$$$$$\\ $$ |  $$ |      $$$$$$$  |$$ |  $$ |  $$ |      $$ |   $$$$$$$$\\ $$$$$$$$\\ ",
+							"  \\______/ \\________|\\__|  \\__|      \\_______/ \\__|  \\__|  \\__|      \\__|   \\________|\\________|" };
+
+
+
+
+	for (int i = 0; i < 20; i++) {
+
+		for (auto str : logo) {
+
+			SetConsoleTextAttribute(hConsole, rand() % 15 + 1);
+
+			std::cout << str << std::endl;
+		}
+
+		SetConsoleTextAttribute(hConsole, 7);
+
+		std::cout << "\n\n\t\t\t\t\tEnter key to start";  // всё ещё работаю над этим
+		
+
+		Sleep(1000);
+		system("CLS");
+	}
+
+
+
+}
+
+void musicThread()
+{
+	PlaySound(TEXT("music.wav"), NULL, SND_FILENAME | SND_ASYNC);
+}
+
+void consoleSize()
+{
+	CONSOLE_SCREEN_BUFFER_INFOEX consolesize;
+
+	consolesize.cbSize = sizeof(consolesize);
+
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	GetConsoleScreenBufferInfoEx(hConsole, &consolesize);
+
+	COORD c;
+	c.X = 100;
+	c.Y = 30;
+	consolesize.dwSize = c;
+
+	consolesize.srWindow.Left = 0;
+	consolesize.srWindow.Right = 100;
+	consolesize.srWindow.Top = 0;
+	consolesize.srWindow.Bottom = 30;
+
+	SetConsoleScreenBufferInfoEx(hConsole, &consolesize);
 }
 
 
