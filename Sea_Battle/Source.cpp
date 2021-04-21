@@ -272,6 +272,7 @@ int mainMenu()
 			break;
 		default:
 			std::cout << "Введите корректный номер пункта меню." << std::endl;
+			return 0;
 			break;
 		}
 	}
