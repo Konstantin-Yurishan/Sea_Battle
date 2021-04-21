@@ -32,13 +32,14 @@ struct playerField {
 };
 
 
-playerField createPlayerField();
+playerField createPlayerField();	//	создаёт и заполняет поля значениями по умолчанию
 void showField(playerField, playerField);	//	показ игровых полей
 void fillFieldManual(playerField*);	//	заполнение поля в ручном режиме
 void fillFieldAutomatic(playerField*);	//	заполнение поля в автоматическом режиме
-void intro();
-void musicThread();
-void consoleSize();
+void intro();	//	интро в начале игры
+void musicThread();	//	поток для проигрывания музыки в интро
+void consoleSize();	//	изменение размера окна консоли
+int mainMenu();	//	главное меню программы
 
 
 //TODO Fзаполнение поля кораблями в автоматическом режиме
@@ -55,16 +56,17 @@ void consoleSize();
 
 int main()
 {
-	consoleSize();
+	consoleSize();	//	изменение размера окна при запуске программы
 	srand(time(NULL));
 
 	intro();
+
+	//mainMenu();
 
 	playerField field1 = createPlayerField();
 	playerField* ptrField1 = &field1;
 	playerField field2 = createPlayerField();
 	playerField* ptrField2 = &field2;
-
 
 	fillFieldAutomatic(ptrField1);
 	fillFieldAutomatic(ptrField2);
@@ -93,7 +95,6 @@ playerField createPlayerField()
 
 	return newField;
 }
-
 
 //показ обоих полей
 void showField(playerField field1, playerField field2)
@@ -222,6 +223,7 @@ void musicThread()
 	PlaySound(TEXT("music.wav"), NULL, SND_FILENAME | SND_ASYNC);
 }
 
+// меняет размер окна консоли при запуске
 void consoleSize()
 {
 	CONSOLE_SCREEN_BUFFER_INFOEX consolesize;
@@ -243,6 +245,37 @@ void consoleSize()
 	consolesize.srWindow.Bottom = 30;
 
 	SetConsoleScreenBufferInfoEx(hConsole, &consolesize);
+}
+
+int mainMenu()
+{
+
+	int choice;
+	bool exit = false;
+
+	while (!exit) {
+		std::cout << "1. Начать новую игру.";
+		std::cout << "2. Выход из программы";
+		std::cin >> choice;
+
+		switch (choice) {
+		case 1:
+			std::cout << "1. Игрок против игрока.";
+			std::cout << "2. Игрок против компьютера.";
+			std::cout << "0. Выход.";
+			std::cin >> choice;
+
+
+			break;
+		case 0:
+			exit = true;
+			break;
+		default:
+			std::cout << "Введите корректный номер пункта меню." << std::endl;
+			break;
+		}
+	}
+
 }
 
 
