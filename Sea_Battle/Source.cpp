@@ -144,11 +144,11 @@ void fillFieldManual(playerField* field)
 void fillFieldAutomatic(playerField* field1)
 {
 	
-
+	//добавил
 	int ship = 4;
 	int coordX = 1, coordY = 4;
-
-
+	int coordX1 = 1, coordY1 = 4;
+	int dir = 0;
 	while (ship != 0) {
 
 		coordX = rand() % 9 + 1;
@@ -158,6 +158,87 @@ void fillFieldAutomatic(playerField* field1)
 			field1->field[coordX][coordY] = '#';
 			ship--;
 		}
+
+	}
+	while (ship != 3) {
+		coordX1 = rand() % 9 + 1;
+		coordY1 = rand() % 9 + 1;
+		dir = rand() % 4;
+		if (field1->field[coordX1][coordY1] == '~') {
+			if (dir == 0) {
+
+				if (field1->field[coordX1 - 1][coordY1] != '#' && field1->field[coordX1 - 1][coordY1] != '0' && field1->field[coordX1 - 1][coordY1] != ' ') {
+					field1->field[coordX1 - 1][coordY1] = '0';
+					field1->field[coordX1][coordY1] = '0';
+					ship++;
+				}
+
+			}
+			else if (dir == 1) {
+				if (field1->field[coordX1 + 1][coordY1] != '#' && field1->field[coordX1 + 1][coordY1] != '0' && field1->field[coordX1 + 1][coordY1] != ' ') {
+					field1->field[coordX1 + 1][coordY1] = '0';
+					field1->field[coordX1][coordY1] = '0';
+					ship++;
+				}
+			}
+			else if (dir == 2) {
+				if (field1->field[coordX1][coordY1 - 1] != '#' && field1->field[coordX1][coordY1 - 1] != '0' && field1->field[coordX1][coordY1 - 1] != ' ') {
+					field1->field[coordX1][coordY1 - 1] = '0';
+					field1->field[coordX1][coordY1] = '0';
+					ship++;
+				}
+			}
+			else {
+				if (field1->field[coordX1][coordY1 + 1] != '#' && field1->field[coordX1][coordY1 + 1] != '0' && field1->field[coordX1][coordY1 + 1] != ' ') {
+					field1->field[coordX1][coordY1 + 1] = '0';
+					field1->field[coordX1][coordY1] = '0';
+					ship++;
+				}
+			}
+		}
+
+	}
+	while (ship != 1) {
+		coordX1 = rand() % 9 + 1;
+		coordY1 = rand() % 9 + 1;
+		dir = rand() % 4;
+		if (field1->field[coordX1][coordY1] == '~') {
+			if (dir == 0) {
+
+				if (field1->field[coordX1][coordY1] == '~' && field1->field[coordX1 - 1][coordY1] != '#' && field1->field[coordX1 - 1][coordY1] != '0' && field1->field[coordX1 - 1][coordY1] != ' ' && field1->field[coordX1 - 1][coordY1] != '3' && field1->field[coordX1 - 2][coordY1] != '#' && field1->field[coordX1 - 2][coordY1] != '0' && field1->field[coordX1 - 2][coordY1] != ' ' && field1->field[coordX1 - 2][coordY1] != '3') {
+					field1->field[coordX1 - 1][coordY1] = '3';
+					field1->field[coordX1 - 2][coordY1] = '3';
+					field1->field[coordX1][coordY1] = '3';
+					ship--;
+				}
+
+			}
+			else if (dir == 1) {
+				if (field1->field[coordX1][coordY1] == '~' && field1->field[coordX1 + 1][coordY1] != '#' && field1->field[coordX1 + 1][coordY1] != '0' && field1->field[coordX1 + 1][coordY1] != ' ' && field1->field[coordX1 + 1][coordY1] != '3' && field1->field[coordX1 + 2][coordY1] != '#' && field1->field[coordX1 + 2][coordY1] != '0' && field1->field[coordX1 + 2][coordY1] != ' ' && field1->field[coordX1 + 2][coordY1] != '3') {
+					field1->field[coordX1 + 1][coordY1] = '3';
+					field1->field[coordX1 + 2][coordY1] = '3';
+					field1->field[coordX1][coordY1] = '3';
+					ship--;
+				}
+			}
+			else if (dir == 2) {
+				if (field1->field[coordX1][coordY1] == '~' && field1->field[coordX1][coordY1 - 1] != '#' && field1->field[coordX1][coordY1 - 1] != '0' && field1->field[coordX1][coordY1 - 1] != ' ' && field1->field[coordX1][coordY1 - 1] != '3' && field1->field[coordX1][coordY1 - 2] != '#' && field1->field[coordX1][coordY1 - 2] != '0' && field1->field[coordX1][coordY1 - 2] != ' ' && field1->field[coordX1][coordY1 - 2] != '3') {
+					field1->field[coordX1][coordY1 - 1] = '3';
+					field1->field[coordX1][coordY1 - 2] = '3';
+					field1->field[coordX1][coordY1] = '3';
+					ship--;
+				}
+			}
+			else {
+				if (field1->field[coordX1][coordY1] == '~' && field1->field[coordX1][coordY1 + 1] != '#' && field1->field[coordX1][coordY1 + 1] != '0' && field1->field[coordX1][coordY1 + 1] != ' ' && field1->field[coordX1][coordY1 + 1] != '3' && field1->field[coordX1][coordY1 + 2] != '#' && field1->field[coordX1][coordY1 + 2] != '0' && field1->field[coordX1][coordY1 + 2] != ' ' && field1->field[coordX1][coordY1 + 2] != '3') {
+					field1->field[coordX1][coordY1 + 1] = '3';
+					field1->field[coordX1][coordY1 + 2] = '3';
+					field1->field[coordX1][coordY1] = '3';
+					ship--;
+				}
+			}
+		}
+
 	}
 }
 
