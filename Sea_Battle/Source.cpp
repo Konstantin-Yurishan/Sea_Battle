@@ -40,6 +40,7 @@ void intro();	//	интро в начале игры
 void musicThread();	//	поток для проигрывания музыки в интро
 void consoleSize();	//	изменение размера окна консоли
 int mainMenu();	//	главное меню программы
+void errorPrinter(int);	//	выводит ошибку согласно переданому числу
 
 
 //TODO Fзаполнение поля кораблями в автоматическом режиме
@@ -245,7 +246,7 @@ int mainMenu()
 
 	while (!exit) {
 		std::cout << "1. Начать новую игру.";
-		std::cout << "2. Выход из программы";
+		std::cout << "2. Выход из программы.";
 		std::cin >> choice;
 
 		switch (choice) {
@@ -255,6 +256,17 @@ int mainMenu()
 			std::cout << "0. Выход.";
 			std::cin >> choice;
 
+			switch (choice) {
+			case 1:
+				break;
+			case 2:
+				break;
+			case 0:
+				break;
+			default:
+				std::cout << "Error!" << std::endl;
+
+			}
 
 			break;
 		case 0:
@@ -267,6 +279,10 @@ int mainMenu()
 		}
 	}
 
+}
+
+void errorPrinter(int)
+{
 }
 
 
