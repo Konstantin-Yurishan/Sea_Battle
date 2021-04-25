@@ -18,6 +18,7 @@
 #include <string>
 #include <Windows.h>
 #include <thread>
+#include <conio.h>
 #pragma comment(lib, "winmm.lib")
 
 struct playerField {
@@ -31,7 +32,7 @@ struct playerField {
 
 };
 
-
+HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 playerField createPlayerField();	//	создаёт и заполняет поля значениями по умолчанию
 void showField(playerField, playerField);	//	показ игровых полей
 void fillFieldManual(playerField*);	//	заполнение поля в ручном режиме
@@ -39,9 +40,11 @@ void fillFieldAutomatic(playerField*);	//	заполнение поля в ав�
 void intro();	//	интро в начале игры
 void musicThread();	//	поток для проигрывания музыки в интро
 void consoleSize();	//	изменение размера окна консоли
-int mainMenu();	//	главное меню программы
+void mainMenu();	//	главное меню программы
 void errorPrinter(int);	//	выводит ошибку согласно переданому числу
-
+bool checkArea(playerField*, int, int);
+void enemyShotEasy(playerField*);	//	выстрел компьютера
+bool break_cond = false;
 
 //TODO Fзаполнение поля кораблями в автоматическом режиме
 //TODO Fзаполнение поля кораблями в ручном режиме игроком
@@ -57,10 +60,11 @@ void errorPrinter(int);	//	выводит ошибку согласно пере
 
 int main()
 {
+
 	consoleSize();	//	изменение размера окна при запуске программы
 	srand(time(NULL));
 
-	intro();
+	//intro();
 
 	//mainMenu();
 
@@ -108,19 +112,36 @@ void showField(playerField field1, playerField field2)
 		if (i != 9) std::cout << " ";
 
 		for (int c = 0; c < 10; c++) {
-			SetConsoleTextAttribute(hConsole, 3);
-			std::cout << field1.field[i][c] << "  ";
+			if (field1.field[i][c] == '#') {
+				SetConsoleTextAttribute(hConsole, 150);
+				std::cout << field1.field[i][c];
+			}
+			else if (field1.field[i][c] == '~') {
+				SetConsoleTextAttribute(hConsole, 3);
+				std::cout << field1.field[i][c];
+			}
+			SetConsoleTextAttribute(hConsole, 7);
+			std::cout << "  ";
 		}
 
-		SetConsoleTextAttribute(hConsole, 7);
 		std::cout << "\t";
 		std::cout << i + 1;
 		if (i != 9) std::cout << " ";
 
 		for (int c = 0; c < 10; c++) {
-			SetConsoleTextAttribute(hConsole, 3);
-			std::cout << field2.field[i][c] << "  ";
+			if (field2.field[i][c] == '#') {
+				SetConsoleTextAttribute(hConsole, 150);
+				std::cout << field2.field[i][c];
+			}
+			else if (field2.field[i][c] == '~') {
+				SetConsoleTextAttribute(hConsole, 3);
+				std::cout << field2.field[i][c];
+			}
+			SetConsoleTextAttribute(hConsole, 7);
+			std::cout << "  ";
 		}
+
+
 		std::cout << std::endl << std::endl;
 
 		SetConsoleTextAttribute(hConsole, 7);
@@ -144,101 +165,157 @@ void fillFieldManual(playerField* field)
 void fillFieldAutomatic(playerField* field1)
 {
 	
-	//добавил
-	int ship = 4;
-	int coordX = 1, coordY = 4;
-	int coordX1 = 1, coordY1 = 4;
-	int dir = 0;
-	while (ship != 0) {
+	int coordX, coordY, dir;
 
-		coordX = rand() % 9 + 1;
-		coordY = rand() % 9 + 1;
-		// TODO проверка окресности точки
-		if (field1->field[coordX][coordY] == '~') {
+	//однопалубные
+	while (field1->ship1 != 4) {
+
+		coordX = rand() % 10;
+		coordY = rand() % 10;
+		
+		if (checkArea(field1, coordX, coordY)) {
 			field1->field[coordX][coordY] = '#';
-			ship--;
+			field1->ship1++;
+		}
+	}
+	//двухпалубные
+	while (field1->ship2 != 3) {
+		coordX = rand() % 10;
+		coordY = rand() % 10;
+
+		dir = rand() % 4;
+
+		if ((coordX == 0 && dir == 0) || (coordY == 0 && dir == 2) || (coordX == 9 && dir == 1) || (coordY == 9 && dir == 3)) {
+			continue;
 		}
 
-	}
-	while (ship != 3) {
-		coordX1 = rand() % 9 + 1;
-		coordY1 = rand() % 9 + 1;
-		dir = rand() % 4;
-		if (field1->field[coordX1][coordY1] == '~') {
+		if (checkArea(field1, coordX, coordY)) {
+			//	вверх
 			if (dir == 0) {
-
-				if (field1->field[coordX1 - 1][coordY1] != '#' && field1->field[coordX1 - 1][coordY1] != '0' && field1->field[coordX1 - 1][coordY1] != ' ') {
-					field1->field[coordX1 - 1][coordY1] = '0';
-					field1->field[coordX1][coordY1] = '0';
-					ship++;
+				if (checkArea(field1, coordX - 1, coordY)) {
+					field1->field[coordX - 1][coordY] = '#';
+					field1->field[coordX][coordY] = '#';
+					field1->ship2++;
 				}
+			}// низ
+			else if (dir == 1) {
+				if (checkArea(field1, coordX + 1, coordY)) {
+					field1->field[coordX + 1][coordY] = '#';
+					field1->field[coordX][coordY] = '#';
+					field1->ship2++;
+				}
+			} //влево
+			else if (dir == 2) {
+				if (checkArea(field1, coordX, coordY - 1)) {
+					field1->field[coordX][coordY - 1] = '#';
+					field1->field[coordX][coordY] = '#';
+					field1->ship2++;
+				}
+			} //вправо
+			else {
+				if (checkArea(field1, coordX, coordY + 1)) {
+					field1->field[coordX][coordY + 1] = '#';
+					field1->field[coordX][coordY] = '#';
+					field1->ship2++;
+				}
+			}
+		}
+	}
 
+	//трёхпалубные
+	while (field1->ship3 != 2) {
+		coordX = rand() % 10;
+		coordY = rand() % 10;
+		dir = rand() % 4;
+
+		if ((coordX < 3 && dir == 0) || (coordY < 3 && dir == 2) || (coordX > 7 && dir == 1) || (coordY > 7 && dir == 3)) {
+			continue;
+		}
+
+		if (checkArea(field1, coordX, coordY)) {
+			if (dir == 0) {
+				if (checkArea(field1, coordX - 1, coordY) && checkArea(field1, coordX - 2, coordY)) {
+					field1->field[coordX - 1][coordY] = '#';
+					field1->field[coordX - 2][coordY] = '#';
+					field1->field[coordX][coordY] = '#';
+					field1->ship3++;
+				}
 			}
 			else if (dir == 1) {
-				if (field1->field[coordX1 + 1][coordY1] != '#' && field1->field[coordX1 + 1][coordY1] != '0' && field1->field[coordX1 + 1][coordY1] != ' ') {
-					field1->field[coordX1 + 1][coordY1] = '0';
-					field1->field[coordX1][coordY1] = '0';
-					ship++;
+				if (checkArea(field1, coordX + 1, coordY) && checkArea(field1, coordX + 2, coordY)) {
+					field1->field[coordX + 1][coordY] = '#';
+					field1->field[coordX + 2][coordY] = '#';
+					field1->field[coordX][coordY] = '#';
+					field1->ship3++;
 				}
 			}
 			else if (dir == 2) {
-				if (field1->field[coordX1][coordY1 - 1] != '#' && field1->field[coordX1][coordY1 - 1] != '0' && field1->field[coordX1][coordY1 - 1] != ' ') {
-					field1->field[coordX1][coordY1 - 1] = '0';
-					field1->field[coordX1][coordY1] = '0';
-					ship++;
+				if (checkArea(field1, coordX, coordY - 1) && checkArea(field1, coordX, coordY - 2)) {
+					field1->field[coordX][coordY - 1] = '#';
+					field1->field[coordX][coordY - 2] = '#';
+					field1->field[coordX][coordY] = '#';
+					field1->ship3++;
 				}
 			}
 			else {
-				if (field1->field[coordX1][coordY1 + 1] != '#' && field1->field[coordX1][coordY1 + 1] != '0' && field1->field[coordX1][coordY1 + 1] != ' ') {
-					field1->field[coordX1][coordY1 + 1] = '0';
-					field1->field[coordX1][coordY1] = '0';
-					ship++;
+				if (checkArea(field1, coordX, coordY + 1) && checkArea(field1, coordX, coordY + 2)) {
+					field1->field[coordX][coordY + 1] = '#';
+					field1->field[coordX][coordY + 2] = '#';
+					field1->field[coordX][coordY] = '#';
+					field1->ship3++;
 				}
 			}
 		}
-
 	}
-	while (ship != 1) {
-		coordX1 = rand() % 9 + 1;
-		coordY1 = rand() % 9 + 1;
+
+	//четёрехпалубный
+	while (field1->ship4 != 1) {
+		coordX = rand() % 10;
+		coordY = rand() % 10;
 		dir = rand() % 4;
-		if (field1->field[coordX1][coordY1] == '~') {
+
+		if ((coordX < 4 && dir == 0) || (coordY < 4 && dir == 2) || (coordX > 6 && dir == 1) || (coordY > 6 && dir == 3)) {
+			continue;
+		}
+
+		if (checkArea(field1, coordX, coordY)) {
 			if (dir == 0) {
-
-				if (field1->field[coordX1][coordY1] == '~' && field1->field[coordX1 - 1][coordY1] != '#' && field1->field[coordX1 - 1][coordY1] != '0' && field1->field[coordX1 - 1][coordY1] != ' ' && field1->field[coordX1 - 1][coordY1] != '3' && field1->field[coordX1 - 2][coordY1] != '#' && field1->field[coordX1 - 2][coordY1] != '0' && field1->field[coordX1 - 2][coordY1] != ' ' && field1->field[coordX1 - 2][coordY1] != '3') {
-					field1->field[coordX1 - 1][coordY1] = '3';
-					field1->field[coordX1 - 2][coordY1] = '3';
-					field1->field[coordX1][coordY1] = '3';
-					ship--;
+				if (checkArea(field1, coordX - 1, coordY) && checkArea(field1, coordX - 2, coordY) && checkArea(field1, coordX - 3, coordY)) {
+					field1->field[coordX - 1][coordY] = '#';
+					field1->field[coordX - 2][coordY] = '#';
+					field1->field[coordX - 3][coordY] = '#';
+					field1->field[coordX][coordY] = '#';
+					field1->ship4++;
 				}
-
 			}
 			else if (dir == 1) {
-				if (field1->field[coordX1][coordY1] == '~' && field1->field[coordX1 + 1][coordY1] != '#' && field1->field[coordX1 + 1][coordY1] != '0' && field1->field[coordX1 + 1][coordY1] != ' ' && field1->field[coordX1 + 1][coordY1] != '3' && field1->field[coordX1 + 2][coordY1] != '#' && field1->field[coordX1 + 2][coordY1] != '0' && field1->field[coordX1 + 2][coordY1] != ' ' && field1->field[coordX1 + 2][coordY1] != '3') {
-					field1->field[coordX1 + 1][coordY1] = '3';
-					field1->field[coordX1 + 2][coordY1] = '3';
-					field1->field[coordX1][coordY1] = '3';
-					ship--;
+				if (checkArea(field1, coordX + 1, coordY) && checkArea(field1, coordX + 2, coordY) && checkArea(field1, coordX + 3, coordY)) {
+					field1->field[coordX + 1][coordY] = '#';
+					field1->field[coordX + 2][coordY] = '#';
+					field1->field[coordX + 3][coordY] = '#';
+					field1->field[coordX][coordY] = '#';
+					field1->ship4++;
 				}
 			}
 			else if (dir == 2) {
-				if (field1->field[coordX1][coordY1] == '~' && field1->field[coordX1][coordY1 - 1] != '#' && field1->field[coordX1][coordY1 - 1] != '0' && field1->field[coordX1][coordY1 - 1] != ' ' && field1->field[coordX1][coordY1 - 1] != '3' && field1->field[coordX1][coordY1 - 2] != '#' && field1->field[coordX1][coordY1 - 2] != '0' && field1->field[coordX1][coordY1 - 2] != ' ' && field1->field[coordX1][coordY1 - 2] != '3') {
-					field1->field[coordX1][coordY1 - 1] = '3';
-					field1->field[coordX1][coordY1 - 2] = '3';
-					field1->field[coordX1][coordY1] = '3';
-					ship--;
+				if (checkArea(field1, coordX, coordY - 1) && checkArea(field1, coordX, coordY - 2) && checkArea(field1, coordX, coordY - 3)) {
+					field1->field[coordX][coordY - 1] = '#';
+					field1->field[coordX][coordY - 2] = '#';
+					field1->field[coordX][coordY - 3] = '#';
+					field1->field[coordX][coordY] = '#';
+					field1->ship4++;
 				}
 			}
 			else {
-				if (field1->field[coordX1][coordY1] == '~' && field1->field[coordX1][coordY1 + 1] != '#' && field1->field[coordX1][coordY1 + 1] != '0' && field1->field[coordX1][coordY1 + 1] != ' ' && field1->field[coordX1][coordY1 + 1] != '3' && field1->field[coordX1][coordY1 + 2] != '#' && field1->field[coordX1][coordY1 + 2] != '0' && field1->field[coordX1][coordY1 + 2] != ' ' && field1->field[coordX1][coordY1 + 2] != '3') {
-					field1->field[coordX1][coordY1 + 1] = '3';
-					field1->field[coordX1][coordY1 + 2] = '3';
-					field1->field[coordX1][coordY1] = '3';
-					ship--;
+				if (checkArea(field1, coordX, coordY + 1) && checkArea(field1, coordX, coordY + 2) && checkArea(field1, coordX, coordY + 3)) {
+					field1->field[coordX][coordY + 1] = '#';
+					field1->field[coordX][coordY + 2] = '#';
+					field1->field[coordX][coordY + 3] = '#';
+					field1->field[coordX][coordY] = '#';
+					field1->ship4++;
 				}
 			}
 		}
-
 	}
 }
 
@@ -247,8 +324,8 @@ void intro()
 {
 	std::thread thr(musicThread);
 	thr.join();
-	std::this_thread::yield();
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	
+
 
 	std::string logo[19] = { "\n\n                               $$$$$$$$\\ $$$$$$$\\ $$$$$$\\  $$$$$$\\                              ",
 							"                               $$  _____|$$  __$$\\\\_$$  _|$$  __$$\\                             ",
@@ -270,7 +347,8 @@ void intro()
 							" \\$$$$$$  |$$$$$$$$\\ $$ |  $$ |      $$$$$$$  |$$ |  $$ |  $$ |      $$ |   $$$$$$$$\\ $$$$$$$$\\ ",
 							"  \\______/ \\________|\\__|  \\__|      \\_______/ \\__|  \\__|  \\__|      \\__|   \\________|\\________|" };
 
-	for (int i = 0; i < 20; i++) {
+
+	for (int i = 0; i < 2; i++) {
 
 		for (auto str : logo) {
 
@@ -281,13 +359,14 @@ void intro()
 
 		SetConsoleTextAttribute(hConsole, 7);
 
-		std::cout << "\n\n\t\t\t\t\tEnter key to start";  // всё ещё работаю над этим
+		std::cout << "\n\n\t\t\t\tGame will start untill " << 10 - i << " sec.";  // всё ещё работаю над этим
 		
 
 		Sleep(1000);
 		system("CLS");
-	}
 
+	}
+	return;
 }
 
 void musicThread()
@@ -319,51 +398,121 @@ void consoleSize()
 	SetConsoleScreenBufferInfoEx(hConsole, &consolesize);
 }
 
-int mainMenu()
+void mainMenu()
 {
 
 	int choice;
 	bool exit = false;
 
 	while (!exit) {
-		std::cout << "1. Начать новую игру.";
-		std::cout << "2. Выход из программы.";
+		std::cout << "1. Start new game." << std::endl;
+		std::cout << "0. Exit." << std::endl;
 		std::cin >> choice;
+		system("CLS");
 
 		switch (choice) {
 		case 1:
-			std::cout << "1. Игрок против игрока.";
-			std::cout << "2. Игрок против компьютера.";
-			std::cout << "0. Выход.";
-			std::cin >> choice;
+			while (!exit) {
+				std::cout << "1. Player_1 vs Player_2." << std::endl;
+				std::cout << "2. Player vs PC." << std::endl;
+				std::cout << "0. Exit." << std::endl;
+				std::cin >> choice;
+				system("CLS");
+				//	автоматическая или ручная расстановка
+				switch (choice) {
+				case 1:
+					//	start game
+					break;
+				case 2:
+					while (!exit) {
+						std::cout << "Choose difficult:" << std::endl;
+						std::cout << "1. Easy." << std::endl;
+						std::cout << "2. Hard." << std::endl;
+						std::cout << "0. Exit." << std::endl;
+						std::cin >> choice;
 
-			switch (choice) {
-			case 1:
-				break;
-			case 2:
-				break;
-			case 0:
-				break;
-			default:
-				std::cout << "Error!" << std::endl;
-
+						switch (choice) {
+						case 1:
+							//	start easy game
+							break;
+						case 2:
+							//	strat hard game
+							break;
+						case 0:
+							exit = true;
+							break;
+						default:
+							errorPrinter(1);
+							break;
+						}
+					}
+					break;
+				case 0:
+					exit = true;
+					break;
+				default:
+					errorPrinter(1);
+					break;
+				}
 			}
-
 			break;
 		case 0:
 			exit = true;
 			break;
 		default:
-			std::cout << "Введите корректный номер пункта меню." << std::endl;
-			return 0;
+			errorPrinter(1);
 			break;
 		}
 	}
 
 }
 
-void errorPrinter(int)
+void errorPrinter(int e)
 {
+
+	SetConsoleTextAttribute(hConsole, 4);
+
+	switch (e) {
+	case 1:
+		std::cout << "Enter the correct menu point." << std::endl;
+		break;
+	default:
+		std::cout << "Unknown error code." << std::endl;
+		break;
+	}
+
+	SetConsoleTextAttribute(hConsole, 7);
 }
+
+bool checkArea(playerField* field, int X, int Y)
+{
+	for (int i = X - 1; i <= X + 1; i++) {
+		for (int c = Y - 1; c <= Y + 1; c++) {
+
+			if (i < 0 || c < 0 || i > 9 || c > 9 || field->field[i][c] == '~') {
+				continue;
+			} else {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+void enemyShotEasy(playerField* field)
+{
+	int x = rand() % 10;
+	int y = rand() % 10;
+
+	if (field->field[x][y] == '#') {
+		field->field[x][y] = 'X';
+		std::cout << "Nice shoot!" << std::endl;
+	}
+	else {
+		std::cout << "Looser!" << std::endl;
+	}
+}
+
+
 
 
