@@ -33,8 +33,11 @@ struct playerField {
 };
 
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+bool break_cond = false;
+
 playerField createPlayerField();	//	создаёт и заполняет поля значениями по умолчанию
-void showField(playerField, playerField);	//	показ игровых полей
+void showField(playerField*);
+void showFields(playerField, playerField);	//	показ игровых полей
 void fillFieldManual(playerField*);	//	заполнение поля в ручном режиме
 void fillFieldAutomatic(playerField*);	//	заполнение поля в автоматическом режиме
 void intro();	//	интро в начале игры
@@ -44,7 +47,8 @@ void mainMenu();	//	главное меню программы
 void errorPrinter(int);	//	выводит ошибку согласно переданому числу
 bool checkArea(playerField*, int, int);
 void enemyShotEasy(playerField*);	//	выстрел компьютера
-bool break_cond = false;
+
+
 
 //TODO Fзаполнение поля кораблями в автоматическом режиме
 //TODO Fзаполнение поля кораблями в ручном режиме игроком
@@ -73,10 +77,13 @@ int main()
 	playerField field2 = createPlayerField();
 	playerField* ptrField2 = &field2;
 
-	fillFieldAutomatic(ptrField1);
-	fillFieldAutomatic(ptrField2);
+
+	fillFieldManual(ptrField1);
+
+	//fillFieldAutomatic(ptrField1);
+	//fillFieldAutomatic(ptrField2);
 	
-	showField(field1, field2);
+	//showFields(field1, field2);
 
 
 	return 0;
@@ -101,10 +108,38 @@ playerField createPlayerField()
 	return newField;
 }
 
-//показ обоих полей
-void showField(playerField field1, playerField field2)
+void showField(playerField* field)
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	std::cout << "  A  B  C  D  E  F  G  H  I  J" << std::endl;
+	for (int i = 0; i < 10; i++) {
+		std::cout << i + 1;
+		if (i != 9) std::cout << " ";
+
+		for (int c = 0; c < 10; c++) {
+			if (field->field[i][c] == '#') {
+				SetConsoleTextAttribute(hConsole, 150);
+				std::cout << field->field[i][c];
+				SetConsoleTextAttribute(hConsole, 7);
+			}
+			else if (field->field[i][c] == '~') {
+				SetConsoleTextAttribute(hConsole, 3);
+				std::cout << field->field[i][c];
+				SetConsoleTextAttribute(hConsole, 7);
+			}
+			SetConsoleTextAttribute(hConsole, 7);
+			std::cout << "  ";
+		}
+		std::cout << std::endl << std::endl;
+
+		SetConsoleTextAttribute(hConsole, 7);
+	}
+}
+
+//показ обоих полей
+void showFields(playerField field1, playerField field2)
+{
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);//для манип с конс выводом в данном случае раскраска
 
 	std::cout << "  A  B  C  D  E  F  G  H  I  J \t\t  A  B  C  D  E  F  G  H  I  J " << std::endl;
 	for (int i = 0; i < 10; i++) {
@@ -156,9 +191,124 @@ void showField(playerField field1, playerField field2)
 }
 
 //	заполнение поля в ручном режиме
-void fillFieldManual(playerField* field)
+void fillFieldManual(playerField* field1)
 {
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	int coordX, coordY, dir, finishX, finishY;
+	
+	//однопалубные
+	while (field1->ship1 != 4) {
+		std::cout << "Single-deck ship #" << field1->ship1 + 1 << std::endl;
+		showField(field1);
+		std::cout << "Enter the first coordinate X: ";
+		std::cin >> coordX;
+		std::cout << "Enter the second coordinate Y: ";
+		std::cin >> coordY;
+		if (checkArea(field1, coordX, coordY)) {
+			field1->field[coordX][coordY] = '#';
+			field1->ship1++;
+		}
+		else {
+			std::cout << "Input error!" << std::endl;
+		}
+		
+	}
+	//двухпалубные
+	while (field1->ship2 != 3) {
+		std::cout << "Double-deck ship #" << field1->ship2 + 1 << std::endl;
+		showField(field1);
+		std::cout << "Enter the start coordinate X: ";
+		std::cin >> coordX;
+		std::cout << "Enter the start coordinate Y: ";
+		std::cin >> coordY;
 
+		std::cout << "Enter the finish coordinate X: ";
+		std::cin >> finishX;
+		std::cout << "Enter the finish coordinate Y: ";
+		std::cin >> finishY;
+
+		if ((abs(coordX - finishX) == 1 || abs(coordY - finishY) == 1) && !(abs(coordX - finishX) == 1 && abs(coordY - finishY)==1)) {
+			if (checkArea(field1, coordX, coordY) && checkArea(field1, finishX, finishY)) {
+				field1->field[coordX][coordY] = '#';
+				field1->field[finishX][finishY] = '#';
+				field1->ship2++;
+			}
+			else {
+				std::cout << "Point is not clear." << std::endl;
+			}
+		}
+		else {
+			std::cout << "Input error!" << std::endl;
+		}
+		
+	}
+	
+
+	//трёхпалубные
+	while (field1->ship3 != 2) {
+		std::cout << "Triple-deck ship #" << field1->ship3 + 1 << std::endl;
+		showField(field1);
+		std::cout << "Enter the start coordinate X: ";
+		std::cin >> coordX;
+		std::cout << "Enter the start coordinate Y: ";
+		std::cin >> coordY;
+
+		std::cout << "Enter the finish coordinate X: ";
+		std::cin >> finishX;
+		std::cout << "Enter the finish coordinate Y: ";
+		std::cin >> finishY;
+
+		if ((abs(coordX - finishX) == 2 || abs(coordY - finishY) == 2) && !(abs(coordX - finishX) == 2 && abs(coordY - finishY) == 2)) {
+			if (checkArea(field1, coordX, coordY) && checkArea(field1, finishX, finishY) && checkArea(field1, coordX + (abs(coordX - finishX) == 2 ? 1 : 0), coordY + (abs(coordX - finishX) == 2 ? 1 : 0))) {
+				field1->field[coordX][coordY] = '#';
+				field1->field[coordX + (abs(coordX - finishX) == 2 ? 1 : 0)][coordY + (abs(coordY - finishY) == 2 ? 1 : 0)] = '#';
+				field1->field[finishX][finishY] = '#';
+				field1->ship3++;
+			}
+			else {
+				std::cout << "Point is not clear." << std::endl;
+			}
+		}
+		else {
+			std::cout << "Input error!" << std::endl;
+		}
+
+	}
+	
+
+	//четёрехпалубный
+	while (field1->ship4 != 1) {
+		std::cout << "Four-deck ship #" << field1->ship4 + 1 << std::endl;
+		showField(field1);
+		std::cout << "Enter the start coordinate X: ";
+		std::cin >> coordX;
+		std::cout << "Enter the start coordinate Y: ";
+		std::cin >> coordY;
+
+		std::cout << "Enter the finish coordinate X: ";
+		std::cin >> finishX;
+		std::cout << "Enter the finish coordinate Y: ";
+		std::cin >> finishY;
+
+		if ((abs(coordX - finishX) == 3 || abs(coordY - finishY) == 3) && !(abs(coordX - finishX) == 3 && abs(coordY - finishY) == 3)) {
+			if (checkArea(field1, coordX, coordY) && checkArea(field1, finishX, finishY) && checkArea(field1, coordX + (abs(coordX - finishX) == 3 ? 1 : 0), coordY + (abs(coordX - finishX) == 3 ? 1 : 0)) && checkArea(field1, coordX + (abs(coordX - finishX) == 3 ? 2 : 1), coordY + (abs(coordX - finishX) == 3 ? 2 : 1))) {
+				field1->field[coordX][coordY] = '#';
+				field1->field[coordX + (abs(coordX - finishX) == 3 ? 2 : 0)][coordY + (abs(coordY - finishY) == 3 ? 2 : 0)] = '#';
+				field1->field[coordX + (abs(coordX - finishX) == 3 ? 1 : 0)][coordY + (abs(coordY - finishY) == 3 ? 1 : 0)] = '#';
+				field1->field[finishX][finishY] = '#';
+				field1->ship4++;
+			}
+			else {
+				std::cout << "Point is not clear." << std::endl;
+			}
+		}
+		else {
+			std::cout << "Input error!" << std::endl;
+		}
+
+	}
+
+	showField(field1);
 }
 
 //	заполнение поля в автоматическом режиме
@@ -489,7 +639,7 @@ bool checkArea(playerField* field, int X, int Y)
 	for (int i = X - 1; i <= X + 1; i++) {
 		for (int c = Y - 1; c <= Y + 1; c++) {
 
-			if (i < 0 || c < 0 || i > 9 || c > 9 || field->field[i][c] == '~') {
+			if (i < 0 || c < 0 || i > 9 || c > 9 || field->field[i][c] == '~' || field->field[i][c] != '#') {
 				continue;
 			} else {
 				return false;
