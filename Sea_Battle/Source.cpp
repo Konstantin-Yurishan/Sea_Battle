@@ -51,6 +51,7 @@ bool checkArea(playerField*, int, int);
 bool enemyShotEasy(playerField*);	//	выстрел компьютера
 bool checkEndOfGame(playerField*, playerField*);
 bool checkShoot(playerField*, int, int);
+//возввращает координаты нажатия мыши в виде преобразованного x и y
 
 
 //Вввод координат одной строкой
