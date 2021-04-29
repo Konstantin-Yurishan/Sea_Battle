@@ -703,17 +703,26 @@ bool enemyShotEasy(playerField* field)
 
 	if (field->field[x][y] == '#') {
 		field->field[x][y] = 'X';
+		SetConsoleTextAttribute(hConsole, 110);
+		std::cout << "\n\n\n\n\n\n\n\n\t\t\t\t\t\t";
 		std::cout << "Nice shoot!" << std::endl;
+		SetConsoleTextAttribute(hConsole, 7);
+		Sleep(2000);
+		system("CLS");
 		field->sumOfShipsDecks--;
 		return true;
 	}
 	else {
 		field->field[x][y] = '0';
+		SetConsoleTextAttribute(hConsole, 110);
+		std::cout << "\n\n\n\n\n\n\n\n\t\t\t\t\t\t";
 		std::cout << "Looser!" << std::endl;
+		SetConsoleTextAttribute(hConsole, 7);
+		Sleep(2000);
+		system("CLS");
 	}
 
-	Sleep(2000);
-	system("CLS");
+	
 
 }
 
