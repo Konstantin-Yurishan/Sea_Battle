@@ -23,10 +23,12 @@
 
 struct playerField {
 
+	//bool - игрок или компьютер
 	int ship1 = 0;
 	int ship2 = 0;
 	int ship3 = 0;
 	int ship4 = 0;
+	int sumOfShipsDecks = 20;
 
 	char** field;
 
@@ -36,7 +38,7 @@ HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 bool break_cond = false;
 
 playerField createPlayerField();	//	создаёт и заполняет поля значениями по умолчанию
-void showField(playerField*);
+void showField(playerField*);         
 void showFields(playerField, playerField);	//	показ игровых полей
 void fillFieldManual(playerField*);	//	заполнение поля в ручном режиме
 void fillFieldAutomatic(playerField*);	//	заполнение поля в автоматическом режиме
@@ -46,10 +48,12 @@ void consoleSize();	//	изменение размера окна консоли
 void mainMenu();	//	главное меню программы
 void errorPrinter(int);	//	выводит ошибку согласно переданому числу
 bool checkArea(playerField*, int, int);
-void enemyShotEasy(playerField*);	//	выстрел компьютера
+bool enemyShotEasy(playerField*);	//	выстрел компьютера
+bool checkEndOfGame(playerField*, playerField*);
+bool checkShoot(playerField*, int, int);
 
 
-
+//Вввод координат одной строкой
 //TODO Fзаполнение поля кораблями в автоматическом режиме
 //TODO Fзаполнение поля кораблями в ручном режиме игроком
 //TODO Fзапрос на выстрел
@@ -61,12 +65,9 @@ void enemyShotEasy(playerField*);	//	выстрел компьютера
 //TODO Fглавное меню
 //TODO Fвывод статистики? -> встраивание в показ полей
 
-//Вввод координат одной строкой
-//туман войны
-//проверка на выйгрыш(конец игр)
-// проверка на попадание
-//сама игра игрок против компьютера
 
+//сама игра игрок против компьютера
+//сильный ИИ
 
 int main()
 {
@@ -84,13 +85,45 @@ int main()
 	playerField* ptrField2 = &field2;
 
 
-	fillFieldManual(ptrField1);
+	//fillFieldManual(ptrField1);
 
-	//fillFieldAutomatic(ptrField1);
-	//fillFieldAutomatic(ptrField2);
+	fillFieldAutomatic(ptrField1);
+	fillFieldAutomatic(ptrField2);
 	
 	//showFields(field1, field2);
 
+	int x, y;
+
+	while (checkEndOfGame(ptrField1, ptrField2)) {
+		while (true) {
+			showFields(field1, field2);
+			std::cout << "Enter the x:";
+			std::cin >> x;
+			std::cout << "Enter the y:";
+			std::cin >> y;
+
+			system("CLS");
+
+			if (checkShoot(ptrField2, x, y)) {
+				ptrField2->field[x][y] = 'X';
+				std::cout << "Nice shoot!" << std::endl;
+				ptrField2->sumOfShipsDecks--;
+			}
+			else {
+				if (ptrField2->field[x][y] == '~' || ptrField2->field[x][y] == 'X') {
+					ptrField2->field[x][y] = '0';
+					std::cout << "Looser!" << std::endl;
+					break;
+				}
+			}
+			showFields(field1, field2);
+		}
+
+		system("CLS");
+		while (enemyShotEasy(ptrField1)) {
+			showFields(field1, field2);
+		}
+	}
 
 	return 0;
 }
@@ -161,6 +194,10 @@ void showFields(playerField field1, playerField field2)
 				SetConsoleTextAttribute(hConsole, 3);
 				std::cout << field1.field[i][c];
 			}
+			else if (field1.field[i][c] == 'X' || field1.field[i][c] == '0') {
+				SetConsoleTextAttribute(hConsole, 3);
+				std::cout << field1.field[i][c];
+			}
 			SetConsoleTextAttribute(hConsole, 7);
 			std::cout << "  ";
 		}
@@ -170,18 +207,22 @@ void showFields(playerField field1, playerField field2)
 		if (i != 9) std::cout << " ";
 
 		for (int c = 0; c < 10; c++) {
-			if (field2.field[i][c] == '#') {
+			if (field2.field[i][c] == 'X') {
 				SetConsoleTextAttribute(hConsole, 150);
 				std::cout << field2.field[i][c];
 			}
-			else if (field2.field[i][c] == '~') {
+			else if (field2.field[i][c] == '0') {
 				SetConsoleTextAttribute(hConsole, 3);
 				std::cout << field2.field[i][c];
 			}
+			else if (field2.field[i][c] == '~' || field2.field[i][c] == '#') {
+				SetConsoleTextAttribute(hConsole, 3);
+				std::cout << '/';
+			}
+			
 			SetConsoleTextAttribute(hConsole, 7);
 			std::cout << "  ";
 		}
-
 
 		std::cout << std::endl << std::endl;
 
@@ -201,7 +242,6 @@ void fillFieldManual(playerField* field1)
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	int coordX, coordY, dir, finishX, finishY;
-	
 	//однопалубные
 	while (field1->ship1 != 4) {
 		std::cout << "Single-deck ship #" << field1->ship1 + 1 << std::endl;
@@ -217,8 +257,9 @@ void fillFieldManual(playerField* field1)
 		else {
 			std::cout << "Input error!" << std::endl;
 		}
-		
 	}
+	
+
 	//двухпалубные
 	while (field1->ship2 != 3) {
 		std::cout << "Double-deck ship #" << field1->ship2 + 1 << std::endl;
@@ -655,7 +696,7 @@ bool checkArea(playerField* field, int X, int Y)
 	return true;
 }
 
-void enemyShotEasy(playerField* field)
+bool enemyShotEasy(playerField* field)
 {
 	int x = rand() % 10;
 	int y = rand() % 10;
@@ -663,11 +704,46 @@ void enemyShotEasy(playerField* field)
 	if (field->field[x][y] == '#') {
 		field->field[x][y] = 'X';
 		std::cout << "Nice shoot!" << std::endl;
+		field->sumOfShipsDecks--;
+		return true;
 	}
 	else {
+		field->field[x][y] = '0';
 		std::cout << "Looser!" << std::endl;
 	}
+
+	Sleep(2000);
+	system("CLS");
+
 }
+
+bool checkEndOfGame(playerField* field1, playerField* field2)
+{
+	if (field1->sumOfShipsDecks == 0) {
+		std::cout << "Player2 win!";
+		return true;
+	}
+	else if (field2->sumOfShipsDecks == 0) {
+		std::cout << "Player1 win!";
+		return true;
+	}
+	else {
+		false;
+	}
+
+}
+
+bool checkShoot(playerField* field, int x, int y)
+{
+	if (field->field[x][y] == '#') {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+
 
 
 
