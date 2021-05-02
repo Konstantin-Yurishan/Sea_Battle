@@ -11,8 +11,6 @@
 // возможность паузы,завершения и новой игры
 //TODO запись статистики по играм
 // TODO цветная карта, звуковая индикация попадания
-// TODO туман войны
-
 
 #include <iostream>
 #include <string>
@@ -45,12 +43,14 @@ void fillFieldAutomatic(playerField*);	//	заполнение поля в ав�
 void intro();	//	интро в начале игры
 void musicThread();	//	поток для проигрывания музыки в интро
 void consoleSize();	//	изменение размера окна консоли
-void mainMenu();	//	главное меню программы
+void mainMenu(playerField*, playerField*);	//	главное меню программы
 void errorPrinter(int);	//	выводит ошибку согласно переданому числу
 bool checkArea(playerField*, int, int);
 bool enemyShotEasy(playerField*);	//	выстрел компьютера
+bool enemyShotHard(playerField*);	//	выстрел компьютера тяжелый
 bool checkEndOfGame(playerField*, playerField*);
 bool checkShoot(playerField*, int, int);
+void game(playerField*, playerField*, int, int);
 
 
 //Вввод координат одной строкой
@@ -66,6 +66,7 @@ bool checkShoot(playerField*, int, int);
 //TODO Fвывод статистики? -> встраивание в показ полей
 
 
+//функция для хода игрока
 //сама игра игрок против компьютера
 //сильный ИИ
 
@@ -75,55 +76,14 @@ int main()
 	consoleSize();	//	изменение размера окна при запуске программы
 	srand(time(NULL));
 
-	//intro();
-
-	//mainMenu();
-
 	playerField field1 = createPlayerField();
 	playerField* ptrField1 = &field1;
 	playerField field2 = createPlayerField();
 	playerField* ptrField2 = &field2;
 
+	//intro();
 
-	//fillFieldManual(ptrField1);
-
-	fillFieldAutomatic(ptrField1);
-	fillFieldAutomatic(ptrField2);
-	
-	//showFields(field1, field2);
-
-	int x, y;
-
-	while (checkEndOfGame(ptrField1, ptrField2)) {
-		while (true) {
-			showFields(field1, field2);
-			std::cout << "Enter the x:";
-			std::cin >> x;
-			std::cout << "Enter the y:";
-			std::cin >> y;
-
-			system("CLS");
-
-			if (checkShoot(ptrField2, x, y)) {
-				ptrField2->field[x][y] = 'X';
-				std::cout << "Nice shoot!" << std::endl;
-				ptrField2->sumOfShipsDecks--;
-			}
-			else {
-				if (ptrField2->field[x][y] == '~' || ptrField2->field[x][y] == 'X') {
-					ptrField2->field[x][y] = '0';
-					std::cout << "Looser!" << std::endl;
-					break;
-				}
-			}
-			showFields(field1, field2);
-		}
-
-		system("CLS");
-		while (enemyShotEasy(ptrField1)) {
-			showFields(field1, field2);
-		}
-	}
+	mainMenu(ptrField1, ptrField2);
 
 	return 0;
 }
@@ -194,9 +154,13 @@ void showFields(playerField field1, playerField field2)
 				SetConsoleTextAttribute(hConsole, 3);
 				std::cout << field1.field[i][c];
 			}
-			else if (field1.field[i][c] == 'X' || field1.field[i][c] == '0') {
+			else if (field1.field[i][c] == 'X') {
 				SetConsoleTextAttribute(hConsole, 3);
 				std::cout << field1.field[i][c];
+			}
+			else if (field1.field[i][c] == '0') {
+				SetConsoleTextAttribute(hConsole, 3);
+				std::cout << '~';
 			}
 			SetConsoleTextAttribute(hConsole, 7);
 			std::cout << "  ";
@@ -595,7 +559,7 @@ void consoleSize()
 	SetConsoleScreenBufferInfoEx(hConsole, &consolesize);
 }
 
-void mainMenu()
+void mainMenu(playerField* field1, playerField* field2)
 {
 
 	int choice;
@@ -615,10 +579,25 @@ void mainMenu()
 				std::cout << "0. Exit." << std::endl;
 				std::cin >> choice;
 				system("CLS");
-				//	автоматическая или ручная расстановка
+				
 				switch (choice) {
 				case 1:
-					//	start game
+					while (true) {
+						int g;
+						std::cout << "1. Manual." << std::endl;
+						std::cout << "2. Auto." << std::endl;
+						std::cin >> g;
+
+						if (g == 1) {
+							game(field1, field2, 1, 1);
+						}
+						else if (g == 2) {
+							game(field1, field2, 1, 2);
+						}
+						else {
+							std::cout << "Enter correct value" << std::endl;
+						}
+					}
 					break;
 				case 2:
 					while (!exit) {
@@ -630,10 +609,10 @@ void mainMenu()
 
 						switch (choice) {
 						case 1:
-							//	start easy game
+							game(field1, field2, 2, 0);
 							break;
 						case 2:
-							//	strat hard game
+							game(field1, field2, 3, 0);
 							break;
 						case 0:
 							exit = true;
@@ -710,11 +689,41 @@ bool enemyShotEasy(playerField* field)
 	else {
 		field->field[x][y] = '0';
 		std::cout << "Looser!" << std::endl;
+		return false;
 	}
 
-	Sleep(2000);
+	Sleep(1000);
 	system("CLS");
 
+}
+
+bool enemyShotHard(playerField* field)
+{
+
+	int x, y;
+
+	while (true) {
+
+		x = rand() % 10;
+		y = rand() % 10;
+
+		if (field->field[x][y] == '0') {
+			continue;
+		}
+		else if (!checkArea(field, x, y)) {
+			if (checkShoot(field, x, y))
+			{
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		else {
+			continue;
+		}
+	}
+	return false;
 }
 
 bool checkEndOfGame(playerField* field1, playerField* field2)
@@ -736,11 +745,174 @@ bool checkEndOfGame(playerField* field1, playerField* field2)
 bool checkShoot(playerField* field, int x, int y)
 {
 	if (field->field[x][y] == '#') {
+		field->field[x][y] = 'X';
+		field->sumOfShipsDecks--;
 		return true;
 	}
 	else {
 		return false;
 	}
+}
+
+void game(playerField* field1, playerField* field2, int gameMode, int fill)
+{
+
+	//1 - игрок против игрока
+	//2 - игрок против ИИ простой
+	//3 - игрок протв ИИ сложный
+	//1 - manual
+	//2 - auto
+
+	int x, y;
+
+	if (fill == 1) {
+		fillFieldManual(field1);
+
+		if (gameMode != 1) {
+			fillFieldAutomatic(field2);
+		}
+		else {
+			fillFieldManual(field2);
+		}
+	}
+	else {
+
+		fillFieldAutomatic(field1);
+		fillFieldAutomatic(field2);
+		
+	}
+
+
+
+
+	if (gameMode == 1) {
+
+		while (checkEndOfGame(field1, field2)) {
+			while (true) {
+
+				std::cout << "\n\n\t\t\tPlayer 1" << std::endl;
+				showFields(*(field1), *(field2));
+
+				std::cout << "Enter the x:";
+				std::cin >> x;
+				std::cout << "Enter the y:";
+				std::cin >> y;
+
+				system("CLS");
+
+				if (checkShoot(field2, x, y)) {
+					system("CLS");
+					std::cout << "Nice shoot!" << std::endl;
+					showFields(*(field1), *(field2));
+				}
+				else {
+					if (field2->field[x][y] == '~') {
+						field2->field[x][y] = '0';
+						std::cout << "Looser!" << std::endl;
+						break;
+					}
+				}
+			}
+			system("CLS");
+
+			while (true) {
+
+				std::cout << "\n\n\t\t\tPlayer 2" << std::endl;
+				showFields(*(field2), *(field1));
+
+				std::cout << "Enter the x:";
+				std::cin >> x;
+				std::cout << "Enter the y:";
+				std::cin >> y;
+
+				system("CLS");
+
+				if (checkShoot(field1, x, y)) {
+					system("CLS");
+					std::cout << "Nice shoot!" << std::endl;
+					showFields(*(field2), *(field1));
+				}
+				else {
+					if (field1->field[x][y] == '~') {
+						field1->field[x][y] = '0';
+						std::cout << "Looser!" << std::endl;
+						break;
+					}
+				}
+			}
+
+		}
+
+	}
+	else if (gameMode == 2) {
+
+		while (checkEndOfGame(field1, field2)) {
+			while (true) {
+				showFields(*(field1), *(field2));
+				std::cout << "Enter the x:";
+				std::cin >> x;
+				std::cout << "Enter the y:";
+				std::cin >> y;
+
+				system("CLS");
+
+				if (checkShoot(field2, x, y)) {
+					system("CLS");
+					std::cout << "Nice shoot!" << std::endl;
+					showFields(*(field1), *(field2));
+				}
+				else {
+					if (field2->field[x][y] == '~' || field2->field[x][y] == 'X') {
+						field2->field[x][y] = '0';
+						std::cout << "Looser!" << std::endl;
+						break;
+					}
+				}
+				showFields(*(field1), *(field2));
+			}
+
+			system("CLS");
+			while (enemyShotEasy(field1)) {
+				showFields(*(field1), *(field2));
+			}
+		}
+	}
+	else if (gameMode == 3) {
+		while (checkEndOfGame(field1, field2)) {
+			while (true) {
+				showFields(*(field1), *(field2));
+				std::cout << "Enter the x:";
+				std::cin >> x;
+				std::cout << "Enter the y:";
+				std::cin >> y;
+
+				system("CLS");
+
+				if (checkShoot(field2, x, y)) {
+					system("CLS");
+					std::cout << "Nice shoot!" << std::endl;
+					showFields(*(field1), *(field2));
+				}
+				else {
+					if (field2->field[x][y] == '~' || field2->field[x][y] == 'X') {
+						field2->field[x][y] = '0';
+						std::cout << "Looser!" << std::endl;
+						break;
+					}
+				}
+				showFields(*(field1), *(field2));
+			}
+
+			system("CLS");
+			while (enemyShotHard(field1)) {
+				showFields(*(field1), *(field2));
+			}
+		}
+	}
+	else {
+		std::cout << "Eternal error!";
+	}
+
 }
 
 
