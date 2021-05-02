@@ -1,52 +1,10 @@
-// TODO режимы игры
-//человек - комп
-//комп - комп
-//Расстановка кораблей:
-//игрок - сам
-//комп за игрока
-//комп играет в 2 режиммах:
-// 1. случайный выстрел
-//2. стратегия
-// отображение тек состояния
-// возможность паузы,завершения и новой игры
-//TODO запись статистики по играм
-// TODO цветная карта, звуковая индикация попадания
-// TODO туман войны
-
-
 #include <iostream>
 #include <string>
 #include <Windows.h>
 #include <thread>
-#include <conio.h>
+#include "Header.h"
 #pragma comment(lib, "winmm.lib")
 
-struct playerField {
-
-	int ship1 = 0;
-	int ship2 = 0;
-	int ship3 = 0;
-	int ship4 = 0;
-
-	char** field;
-
-};
-
-HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-playerField createPlayerField();	//	создаёт и заполняет поля значениями по умолчанию
-void showField(playerField, playerField);	//	показ игровых полей
-void fillFieldManual(playerField*);	//	заполнение поля в ручном режиме
-void fillFieldAutomatic(playerField*);	//	заполнение поля в автоматическом режиме
-void intro();	//	интро в начале игры
-void musicThread();	//	поток для проигрывания музыки в интро
-void consoleSize();	//	изменение размера окна консоли
-void mainMenu();	//	главное меню программы
-void errorPrinter(int);	//	выводит ошибку согласно переданому числу
-bool checkArea(playerField*, int, int);
-void enemyShotEasy(playerField*);	//	выстрел компьютера
-bool break_cond = false;
-
-//TODO Fзаполнение поля кораблями в автоматическом режиме
 //TODO Fзаполнение поля кораблями в ручном режиме игроком
 //TODO Fзапрос на выстрел
 //TODO Fвыстрел компьютера в рандомном режиме
@@ -60,24 +18,16 @@ bool break_cond = false;
 
 int main()
 {
-
 	consoleSize();	//	изменение размера окна при запуске программы
 	srand(time(NULL));
-
-	//intro();
-
-	//mainMenu();
+	intro();
 
 	playerField field1 = createPlayerField();
 	playerField* ptrField1 = &field1;
 	playerField field2 = createPlayerField();
 	playerField* ptrField2 = &field2;
 
-	fillFieldAutomatic(ptrField1);
-	fillFieldAutomatic(ptrField2);
-	
-	showField(field1, field2);
-
+	mainMenu(ptrField1, ptrField2);
 
 	return 0;
 }
@@ -319,7 +269,6 @@ void fillFieldAutomatic(playerField* field1)
 	}
 }
 
-// TODO сделать прерывание при нажатии любой клавиши
 void intro()
 {
 	std::thread thr(musicThread);
@@ -398,45 +347,47 @@ void consoleSize()
 	SetConsoleScreenBufferInfoEx(hConsole, &consolesize);
 }
 
-void mainMenu()
+void mainMenu(playerField* field1, playerField* field2)
 {
 
 	int choice;
 	bool exit = false;
 
 	while (!exit) {
-		std::cout << "1. Start new game." << std::endl;
-		std::cout << "0. Exit." << std::endl;
+		std::cout << "\n\n\n\n\n\t\t\t\t\t1. Start new game." << std::endl;
+		std::cout << "\t\t\t\t\t0. Exit." << std::endl;
 		std::cin >> choice;
 		system("CLS");
 
 		switch (choice) {
 		case 1:
 			while (!exit) {
-				std::cout << "1. Player_1 vs Player_2." << std::endl;
-				std::cout << "2. Player vs PC." << std::endl;
-				std::cout << "0. Exit." << std::endl;
+
+				std::cout << "\n\n\n\n\n\t\t\t\t\t1. Player_1 vs Player_2." << std::endl;
+				std::cout << "\t\t\t\t\t2. Player vs PC." << std::endl;
+				std::cout << "\t\t\t\t\t0. Exit." << std::endl;
 				std::cin >> choice;
 				system("CLS");
-				//	автоматическая или ручная расстановка
+				
 				switch (choice) {
 				case 1:
-					//	start game
+					gamePlayerPlayer(field1, field2);
 					break;
 				case 2:
 					while (!exit) {
-						std::cout << "Choose difficult:" << std::endl;
-						std::cout << "1. Easy." << std::endl;
-						std::cout << "2. Hard." << std::endl;
-						std::cout << "0. Exit." << std::endl;
+
+						std::cout << "\n\n\n\n\n\t\t\t\t\tChoose difficult:" << std::endl;
+						std::cout << "\t\t\t\t\t1. Easy." << std::endl;
+						std::cout << "\t\t\t\t\t2. Hard." << std::endl;
+						std::cout << "\t\t\t\t\t0. Exit." << std::endl;
 						std::cin >> choice;
 
 						switch (choice) {
 						case 1:
-							//	start easy game
+							gamePlayerPC(field1, field2, 1);
 							break;
 						case 2:
-							//	strat hard game
+							gamePlayerPC(field1, field2, 2);
 							break;
 						case 0:
 							exit = true;
@@ -465,6 +416,47 @@ void mainMenu()
 		}
 	}
 
+	/*
+	while (!exit) {
+		std::cout << "\n\n\n\n\n\t\t\t\t\t1. Start new game." << std::endl;
+		std::cout << "\t\t\t\t\t0. Exit." << std::endl;
+		std::cin >> choice;
+		system("CLS");
+
+		if (choice == 1) {
+			std::cout << "\n\n\n\n\n\t\t\t\t\t1. Player_1 vs Player_2." << std::endl;
+			std::cout << "\t\t\t\t\t2. Player vs PC." << std::endl;
+			std::cout << "\t\t\t\t\t0. Exit." << std::endl;
+			std::cin >> choice;
+			system("CLS");
+
+			if (choice == 1) {
+
+			}
+			else if (choice == 2) {
+				std::cout << "\n\n\n\n\n\t\t\t\t\tChoose difficult:" << std::endl;
+				std::cout << "\t\t\t\t\t1. Easy." << std::endl;
+				std::cout << "\t\t\t\t\t2. Hard." << std::endl;
+				std::cout << "\t\t\t\t\t0. Exit." << std::endl;
+				std::cin >> choice;
+				system("CLS");
+			}
+			else if (choice == 0) {
+
+			}
+			else {
+
+			}
+
+		}
+		else if (choice == 0) {
+
+		}
+		else {
+
+		}
+	}
+	*/
 }
 
 void errorPrinter(int e)
@@ -512,6 +504,59 @@ void enemyShotEasy(playerField* field)
 		std::cout << "Looser!" << std::endl;
 	}
 }
+
+void gamePlayerPlayer(playerField* field1, playerField* field2)
+{
+	std::cout << "In gamePlayerPlayer" << std::endl;
+}
+
+void gamePlayerPC(playerField*, playerField*, short difficult)
+{
+
+	//автоматическая или ручная расстановка кораблей?
+		//автоматическая - автоматически заполняет кораблями поле игрока
+		//ручная - игрок расставляет корабли вручную
+
+	//рандомно решается чей ход первый
+
+	//цикл(пока не победит)
+		//показ поля игрока и поле с туманом войны противника
+		//чуть ниже полей информация о составе оставшегося флота
+		//предложение о вводе координат
+		//при удачном попадании сообщение попал или убит - продолжается ход игрока или компьютера
+		//
+
+	std::cout << "In gamePlayerPlayer. Difficult - " << difficult << std::endl;
+}
+
+bool winChecker(playerField* field1, playerField* field2, bool gameMode)
+{
+	if (field1->shipAmount == 0 && gameMode) {
+		std::cout << "Player2 Win!";
+		return true;
+	}
+	else if (field2->shipAmount == 0 && gameMode) {
+		std::cout << "Player1 Win!";
+		return true;
+	}
+	else {
+		return false;
+	}
+
+	if (field1->shipAmount == 0 && !gameMode) {
+		std::cout << "PC Win!";
+		return true;
+	}
+	else if (field2->shipAmount == 0 && !gameMode) {
+		std::cout << "Player1 Win!";
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+
 
 
 
