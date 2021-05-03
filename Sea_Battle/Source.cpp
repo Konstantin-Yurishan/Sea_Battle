@@ -3,7 +3,6 @@
 #include <Windows.h>
 #include <thread>
 #include <conio.h>
-//#include "Header.h"
 #pragma comment(lib, "winmm.lib")
 
 struct playerField {
@@ -36,6 +35,7 @@ bool enemyShotHard(playerField*);	//	выстрел компьютера тяж�
 bool checkEndOfGame(playerField*, playerField*);
 bool checkShoot(playerField*, int, int);
 void game(playerField*, playerField*, int, int);
+void voice(int); 
 void cursorPosition();
 int* cursorPosition2();
 
@@ -55,7 +55,7 @@ int main()
 	playerField field2 = createPlayerField();
 	playerField* ptrField2 = &field2;
 
-	//intro();
+	intro();
 
 	//cursorPosition();
 	//cursorPosition2();
@@ -94,12 +94,12 @@ void showField(playerField* field)
 
 		for (int c = 0; c < 10; c++) {
 			if (field->field[i][c] == '#') {
-				SetConsoleTextAttribute(hConsole, 150);
+				SetConsoleTextAttribute(hConsole, 10);
 				std::cout << field->field[i][c];
 				SetConsoleTextAttribute(hConsole, 7);
 			}
 			else if (field->field[i][c] == '~') {
-				SetConsoleTextAttribute(hConsole, 3);
+				SetConsoleTextAttribute(hConsole, 9);
 				std::cout << field->field[i][c];
 				SetConsoleTextAttribute(hConsole, 7);
 			}
@@ -125,19 +125,19 @@ void showFields(playerField field1, playerField field2)
 
 		for (int c = 0; c < 10; c++) {
 			if (field1.field[i][c] == '#') {
-				SetConsoleTextAttribute(hConsole, 150);
+				SetConsoleTextAttribute(hConsole, 10);
 				std::cout << field1.field[i][c];
 			}
 			else if (field1.field[i][c] == '~') {
-				SetConsoleTextAttribute(hConsole, 3);
+				SetConsoleTextAttribute(hConsole, 9);
 				std::cout << field1.field[i][c];
 			}
 			else if (field1.field[i][c] == 'X') {
-				SetConsoleTextAttribute(hConsole, 3);
+				SetConsoleTextAttribute(hConsole, 4);
 				std::cout << field1.field[i][c];
 			}
 			else if (field1.field[i][c] == '0') {
-				SetConsoleTextAttribute(hConsole, 3);
+				SetConsoleTextAttribute(hConsole, 9);
 				std::cout << '~';
 			}
 			SetConsoleTextAttribute(hConsole, 7);
@@ -150,15 +150,15 @@ void showFields(playerField field1, playerField field2)
 
 		for (int c = 0; c < 10; c++) {
 			if (field2.field[i][c] == 'X') {
-				SetConsoleTextAttribute(hConsole, 150);
+				SetConsoleTextAttribute(hConsole, 4);
 				std::cout << field2.field[i][c];
 			}
 			else if (field2.field[i][c] == '0') {
-				SetConsoleTextAttribute(hConsole, 3);
+				SetConsoleTextAttribute(hConsole, 9);
 				std::cout << field2.field[i][c];
 			}
 			else if (field2.field[i][c] == '~' || field2.field[i][c] == '#') {
-				SetConsoleTextAttribute(hConsole, 3);
+				SetConsoleTextAttribute(hConsole, 9);
 				std::cout << '/';
 			}
 			
@@ -519,7 +519,7 @@ void intro()
 
 void musicThread()
 {
-	PlaySound(TEXT("music.wav"), NULL, SND_FILENAME | SND_ASYNC);
+	PlaySound(TEXT("musica\\intro.wav"), NULL, SND_FILENAME | SND_ASYNC);
 }
 
 //меняет размер окна консоли при запуске
@@ -664,23 +664,36 @@ bool checkArea(playerField* field, int X, int Y)
 
 bool enemyShotEasy(playerField* field)
 {
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
 	int x = rand() % 10;
 	int y = rand() % 10;
 
 	if (field->field[x][y] == '#') {
 		field->field[x][y] = 'X';
-		std::cout << "Nice shoot!" << std::endl;
+		system("CLS");
+		SetConsoleTextAttribute(hConsole, 4);
+		std::cout << "\n\n\n\n\n\n\n\n\n\n\t\t\t\t\tWe get shoot, captain!" << std::endl;
+		voice(1);
+		Sleep(2000);
+		SetConsoleTextAttribute(hConsole, 7);
 		field->sumOfShipsDecks--;
+		system("CLS");
 		return true;
 	}
 	else {
 		field->field[x][y] = '0';
-		std::cout << "Looser!" << std::endl;
+		system("CLS");
+		SetConsoleTextAttribute(hConsole, 10);
+		std::cout << "\n\n\n\n\n\n\n\n\n\n\t\t\t\t\tThey missed!" << std::endl;
+		voice(4);
+		Sleep(2000);
+		SetConsoleTextAttribute(hConsole, 7);
+		system("CLS");
 		return false;
 	}
 
-	Sleep(1000);
-	system("CLS");
+
 
 }
 
@@ -789,13 +802,24 @@ void game(playerField* field1, playerField* field2, int gameMode, int fill)
 
 				if (checkShoot(field2, x, y)) {
 					system("CLS");
-					std::cout << "Nice shoot!" << std::endl;
+					SetConsoleTextAttribute(hConsole, 10);
+					std::cout << "\n\n\n\n\n\n\n\n\n\n\t\t\t\t\tNice shoot!" << std::endl;
+					voice(2);
+					SetConsoleTextAttribute(hConsole, 7);
+					Sleep(2000);
+					system("CLS");
 					showFields(*(field1), *(field2));
 				}
 				else {
 					if (field2->field[x][y] == '~') {
 						field2->field[x][y] = '0';
-						std::cout << "Looser!" << std::endl;
+						system("CLS");
+						SetConsoleTextAttribute(hConsole, 4);
+						std::cout << "\n\n\n\n\n\n\n\n\n\n\t\t\t\t\tWe missed!" << std::endl;
+						voice(3);
+						SetConsoleTextAttribute(hConsole, 7);
+						Sleep(2000);
+						system("CLS");
 						break;
 					}
 				}
@@ -817,13 +841,23 @@ void game(playerField* field1, playerField* field2, int gameMode, int fill)
 
 				if (checkShoot(field1, x, y)) {
 					system("CLS");
-					std::cout << "Nice shoot!" << std::endl;
-					showFields(*(field2), *(field1));
+					SetConsoleTextAttribute(hConsole, 10);
+					std::cout << "\n\n\n\n\n\n\n\n\n\n\t\t\t\t\tNice shoot!" << std::endl;
+					voice(2);
+					SetConsoleTextAttribute(hConsole, 7);
+					Sleep(2000);
+					system("CLS");
 				}
 				else {
 					if (field1->field[x][y] == '~') {
 						field1->field[x][y] = '0';
-						std::cout << "Looser!" << std::endl;
+						system("CLS");
+						SetConsoleTextAttribute(hConsole, 4);
+						std::cout << "\n\n\n\n\n\n\n\n\n\n\t\t\t\t\tWe missed!" << std::endl;
+						voice(3);
+						SetConsoleTextAttribute(hConsole, 7);
+						Sleep(2000);
+						system("CLS");
 						break;
 					}
 				}
@@ -834,9 +868,10 @@ void game(playerField* field1, playerField* field2, int gameMode, int fill)
 	}
 	else if (gameMode == 2) {
 
-		std::cout << "\n\n\t\t    Player 1\t\t\t\t\t    Player 2" << std::endl << std::endl;
 		while (checkEndOfGame(field1, field2)) {
+			
 			while (true) {
+				std::cout << "\n\n\t\t    Player 1\t\t\t\t\t    Player 2" << std::endl << std::endl;
 				showFields(*(field1), *(field2));
 				std::cout << "Enter the x:";
 				std::cin >> x;
@@ -847,17 +882,26 @@ void game(playerField* field1, playerField* field2, int gameMode, int fill)
 
 				if (checkShoot(field2, x, y)) {
 					system("CLS");
-					std::cout << "Nice shoot!" << std::endl;
-					showFields(*(field1), *(field2));
+					SetConsoleTextAttribute(hConsole, 10);
+					std::cout << "\n\n\n\n\n\n\n\n\n\n\t\t\t\t\tNice shoot!" << std::endl;
+					voice(2);
+					SetConsoleTextAttribute(hConsole, 7);
+					Sleep(2000);
+					system("CLS");
 				}
 				else {
 					if (field2->field[x][y] == '~' || field2->field[x][y] == 'X') {
 						field2->field[x][y] = '0';
-						std::cout << "Looser!" << std::endl;
+						system("CLS");
+						SetConsoleTextAttribute(hConsole, 4);
+						std::cout << "\n\n\n\n\n\n\n\n\n\n\t\t\t\t\tWe missed!" << std::endl;
+						voice(3);
+						SetConsoleTextAttribute(hConsole, 7);
+						Sleep(2000);
+						system("CLS");
 						break;
 					}
 				}
-				showFields(*(field1), *(field2));
 			}
 
 			system("CLS");
@@ -869,8 +913,9 @@ void game(playerField* field1, playerField* field2, int gameMode, int fill)
 		}
 	}
 	else if (gameMode == 3) {
-		std::cout << "\n\n\t\t    Player 1\t\t\t\t\t    Player 2" << std::endl << std::endl;
+		
 		while (checkEndOfGame(field1, field2)) {
+			std::cout << "\n\n\t\t    Player 1\t\t\t\t\t    Player 2" << std::endl << std::endl;
 			while (true) {
 				showFields(*(field1), *(field2));
 				std::cout << "Enter the x:";
@@ -882,17 +927,26 @@ void game(playerField* field1, playerField* field2, int gameMode, int fill)
 
 				if (checkShoot(field2, x, y)) {
 					system("CLS");
-					std::cout << "Nice shoot!" << std::endl;
-					showFields(*(field1), *(field2));
+					SetConsoleTextAttribute(hConsole, 10);
+					std::cout << "\n\n\n\n\n\n\n\n\n\n\t\t\t\t\tNice shoot!" << std::endl;
+					voice(1);
+					SetConsoleTextAttribute(hConsole, 7);
+					Sleep(2000);
+					system("CLS");
 				}
 				else {
 					if (field2->field[x][y] == '~' || field2->field[x][y] == 'X') {
 						field2->field[x][y] = '0';
-						std::cout << "Looser!" << std::endl;
+						system("CLS");
+						SetConsoleTextAttribute(hConsole, 4);
+						std::cout << "\n\n\n\n\n\n\n\n\n\n\t\t\t\t\tWe missed!" << std::endl;
+						voice(3);
+						SetConsoleTextAttribute(hConsole, 7);
+						Sleep(2000);
+						system("CLS");
 						break;
 					}
 				}
-				showFields(*(field1), *(field2));
 			}
 
 			system("CLS");
@@ -908,20 +962,93 @@ void game(playerField* field1, playerField* field2, int gameMode, int fill)
 
 }
 
+void voice(int var)
+{
+	//1 - по нам попали, 2 - мы попали, 3 - мы промахнулись, 4 - они промахнулись
+
+
+	if (var == 1) {
+		int g = rand() % 4 + 1;
+		if (g == 1) {
+			PlaySound(TEXT("musica\\alarm1.wav"), NULL, SND_FILENAME | SND_ASYNC);
+		}
+		else if (g == 2) {
+			PlaySound(TEXT("musica\\alarm2.wav"), NULL, SND_FILENAME | SND_ASYNC);
+		}
+		else if (g == 3) {
+			PlaySound(TEXT("musica\\alarm3.wav"), NULL, SND_FILENAME | SND_ASYNC);
+		}
+		else if (g == 4) {
+			PlaySound(TEXT("musica\\alarm4.wav"), NULL, SND_FILENAME | SND_ASYNC);
+		}
+	}
+	else if (var == 2) {
+		int g = rand() % 6 + 1;
+		if (g == 1) {
+			PlaySound(TEXT("musica\\sieg1.wav"), NULL, SND_FILENAME | SND_ASYNC);
+		}
+		else if (g == 2) {
+			PlaySound(TEXT("musica\\sieg2.wav"), NULL, SND_FILENAME | SND_ASYNC);
+		}
+		else if (g == 3) {
+			PlaySound(TEXT("musica\\sieg3.wav"), NULL, SND_FILENAME | SND_ASYNC);
+		}
+		else if (g == 4) {
+			PlaySound(TEXT("musica\\sieg4.wav"), NULL, SND_FILENAME | SND_ASYNC);
+		}
+		else if (g == 5) {
+			PlaySound(TEXT("musica\\sieg5.wav"), NULL, SND_FILENAME | SND_ASYNC);
+		}
+		else if (g == 6) {
+
+		}PlaySound(TEXT("musica\\sieg6.wav"), NULL, SND_FILENAME | SND_ASYNC);
+	}
+	else if (var == 3) {
+		int g = rand() % 5 + 1;
+		if (g == 1) {
+			PlaySound(TEXT("musica\\fraulein1.wav"), NULL, SND_FILENAME | SND_ASYNC);
+		}
+		else if (g == 2) {
+			PlaySound(TEXT("musica\\fraulein2.wav"), NULL, SND_FILENAME | SND_ASYNC);
+		}
+		else if (g == 3) {
+			PlaySound(TEXT("musica\\fraulein3.wav"), NULL, SND_FILENAME | SND_ASYNC);
+		}
+		else if (g == 4) {
+			PlaySound(TEXT("musica\\fraulein4.wav"), NULL, SND_FILENAME | SND_ASYNC);
+		}
+		else if (g == 5) {
+			PlaySound(TEXT("musica\\fraulein5.wav"), NULL, SND_FILENAME | SND_ASYNC);
+		}
+	}
+	else if (var == 4) {
+		int g = rand() % 4 + 1;
+		if (g == 1) {
+			PlaySound(TEXT("musica\\verpasst1.wav"), NULL, SND_FILENAME | SND_ASYNC);
+		}
+		else if (g == 2) {
+			PlaySound(TEXT("musica\\verpasst2.wav"), NULL, SND_FILENAME | SND_ASYNC);
+		}
+		else if (g == 3) {
+			PlaySound(TEXT("musica\\verpasst2.wav"), NULL, SND_FILENAME | SND_ASYNC);
+		}
+		else if (g == 4) {
+			PlaySound(TEXT("musica\\verpasst2.wav"), NULL, SND_FILENAME | SND_ASYNC);
+		}
+	}
+	
+}
+
 void cursorPosition()
 {
 	POINT p;
 	RECT r;
-	int rep[2];
+
 	bool chrt = true;
 	while (chrt) {
 		GetWindowRect(GetConsoleWindow(), &r);
 		GetCursorPos(&p);
 
-		
-			
-			rep[0] = (p.x - r.left) / 10;
-			rep[1] = (p.y - r.top - 31) / 15;
 			if (GetAsyncKeyState(VK_LBUTTON))
 			{
 				chrt = false;
