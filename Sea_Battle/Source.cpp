@@ -960,6 +960,7 @@ int* cursorPosition2()
 		}
 	}
 
+
 	return rep;
 
 }
