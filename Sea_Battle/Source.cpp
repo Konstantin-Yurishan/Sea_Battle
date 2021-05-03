@@ -1,27 +1,13 @@
-// TODO режимы игры
-//человек - комп
-//комп - комп
-//Расстановка кораблей:
-//игрок - сам
-//комп за игрока
-//комп играет в 2 режиммах:
-// 1. случайный выстрел
-//2. стратегия
-// отображение тек состояния
-// возможность паузы,завершения и новой игры
-//TODO запись статистики по играм
-// TODO цветная карта, звуковая индикация попадания
-
 #include <iostream>
 #include <string>
 #include <Windows.h>
 #include <thread>
 #include <conio.h>
+//#include "Header.h"
 #pragma comment(lib, "winmm.lib")
 
 struct playerField {
 
-	//bool - игрок или компьютер
 	int ship1 = 0;
 	int ship2 = 0;
 	int ship3 = 0;
@@ -33,7 +19,6 @@ struct playerField {
 };
 
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-bool break_cond = false;
 
 playerField createPlayerField();	//	создаёт и заполняет поля значениями по умолчанию
 void showField(playerField*);         
@@ -53,22 +38,9 @@ bool checkShoot(playerField*, int, int);
 void game(playerField*, playerField*, int, int);
 
 
-//Вввод координат одной строкой
-//TODO Fзаполнение поля кораблями в автоматическом режиме
-//TODO Fзаполнение поля кораблями в ручном режиме игроком
-//TODO Fзапрос на выстрел
-//TODO Fвыстрел компьютера в рандомном режиме
-//TODO Fвыстрел компьютера в интеллектуальном режиме
-//TODO Fпроверка очерёдности хода
-//TODO Fпроверка результативности выстрела
-//TODO Fструктура для полей (поле, количество кораблей по классам, количество потопленных)
-//TODO Fглавное меню
-//TODO Fвывод статистики? -> встраивание в показ полей
-
-
-//функция для хода игрока
-//сама игра игрок против компьютера
-//сильный ИИ
+//функция сильного ИИ
+//подбитые корабли - красный, корабли - зелёный, область промаха - белый
+//
 
 int main()
 {
@@ -140,10 +112,11 @@ void showFields(playerField field1, playerField field2)
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);//для манип с конс выводом в данном случае раскраска
 
-	std::cout << "  A  B  C  D  E  F  G  H  I  J \t\t  A  B  C  D  E  F  G  H  I  J " << std::endl;
+	std::cout << "\t  A  B  C  D  E  F  G  H  I  J \t\t\t  A  B  C  D  E  F  G  H  I  J " << std::endl;
 	for (int i = 0; i < 10; i++) {
-		std::cout << i + 1;
+		std::cout << "\t" << i + 1;
 		if (i != 9) std::cout << " ";
+
 
 		for (int c = 0; c < 10; c++) {
 			if (field1.field[i][c] == '#') {
@@ -167,7 +140,7 @@ void showFields(playerField field1, playerField field2)
 		}
 
 		std::cout << "\t";
-		std::cout << i + 1;
+		std::cout << "\t" << i + 1;
 		if (i != 9) std::cout << " ";
 
 		for (int c = 0; c < 10; c++) {
@@ -201,13 +174,14 @@ void showFields(playerField field1, playerField field2)
 
 }
 
-//	заполнение поля в ручном режиме
+//заполнение поля в ручном режиме
 void fillFieldManual(playerField* field1)
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	int coordX, coordY, dir, finishX, finishY;
 	//однопалубные
 	while (field1->ship1 != 4) {
+		system("CLS");
 		std::cout << "Single-deck ship #" << field1->ship1 + 1 << std::endl;
 		showField(field1);
 		std::cout << "Enter the first coordinate X: ";
@@ -226,6 +200,7 @@ void fillFieldManual(playerField* field1)
 
 	//двухпалубные
 	while (field1->ship2 != 3) {
+		system("CLS");
 		std::cout << "Double-deck ship #" << field1->ship2 + 1 << std::endl;
 		showField(field1);
 		std::cout << "Enter the start coordinate X: ";
@@ -257,6 +232,7 @@ void fillFieldManual(playerField* field1)
 
 	//трёхпалубные
 	while (field1->ship3 != 2) {
+		system("CLS");
 		std::cout << "Triple-deck ship #" << field1->ship3 + 1 << std::endl;
 		showField(field1);
 		std::cout << "Enter the start coordinate X: ";
@@ -289,6 +265,7 @@ void fillFieldManual(playerField* field1)
 
 	//четёрехпалубный
 	while (field1->ship4 != 1) {
+		system("CLS");
 		std::cout << "Four-deck ship #" << field1->ship4 + 1 << std::endl;
 		showField(field1);
 		std::cout << "Enter the start coordinate X: ";
@@ -322,7 +299,7 @@ void fillFieldManual(playerField* field1)
 	showField(field1);
 }
 
-//	заполнение поля в автоматическом режиме
+//заполнение поля в автоматическом режиме
 void fillFieldAutomatic(playerField* field1)
 {
 	
@@ -480,7 +457,7 @@ void fillFieldAutomatic(playerField* field1)
 	}
 }
 
-// TODO сделать прерывание при нажатии любой клавиши
+//TODO сделать прерывание при нажатии любой клавиши
 void intro()
 {
 	std::thread thr(musicThread);
@@ -509,7 +486,7 @@ void intro()
 							"  \\______/ \\________|\\__|  \\__|      \\_______/ \\__|  \\__|  \\__|      \\__|   \\________|\\________|" };
 
 
-	for (int i = 0; i < 2; i++) {
+	for (int i = 0; i < 10; i++) {
 
 		for (auto str : logo) {
 
@@ -535,7 +512,7 @@ void musicThread()
 	PlaySound(TEXT("music.wav"), NULL, SND_FILENAME | SND_ASYNC);
 }
 
-// меняет размер окна консоли при запуске
+//меняет размер окна консоли при запуске
 void consoleSize()
 {
 	CONSOLE_SCREEN_BUFFER_INFOEX consolesize;
@@ -562,36 +539,36 @@ void consoleSize()
 void mainMenu(playerField* field1, playerField* field2)
 {
 
-	int choice;
+	char choice;
 	bool exit = false;
 
 	while (!exit) {
-		std::cout << "1. Start new game." << std::endl;
-		std::cout << "0. Exit." << std::endl;
-		std::cin >> choice;
+		std::cout << "\n\n\n\n\n\n\n\n\n\n\t\t\t\t\t1. Start new game." << std::endl;
+		std::cout << "\t\t\t\t\t0. Exit." << std::endl;
+		choice = _getch();
 		system("CLS");
 
 		switch (choice) {
-		case 1:
+		case '1':
 			while (!exit) {
-				std::cout << "1. Player_1 vs Player_2." << std::endl;
-				std::cout << "2. Player vs PC." << std::endl;
-				std::cout << "0. Exit." << std::endl;
-				std::cin >> choice;
+				std::cout << "\n\n\n\n\n\n\n\n\n\n\t\t\t\t\t1. Player_1 vs Player_2." << std::endl;
+				std::cout << "\t\t\t\t\t2. Player vs PC." << std::endl;
+				std::cout << "\t\t\t\t\t0. Exit." << std::endl;
+				choice = _getch();
 				system("CLS");
 				
 				switch (choice) {
-				case 1:
+				case '1':
 					while (true) {
-						int g;
-						std::cout << "1. Manual." << std::endl;
-						std::cout << "2. Auto." << std::endl;
-						std::cin >> g;
+						char g;
+						std::cout << "\n\n\n\n\n\n\n\n\n\n\t\t\t\t\t1. Manual." << std::endl;
+						std::cout << "\t\t\t\t\t2. Auto." << std::endl;
+						g = _getch();
 
-						if (g == 1) {
+						if (g == '1') {
 							game(field1, field2, 1, 1);
 						}
-						else if (g == 2) {
+						else if (g == '2') {
 							game(field1, field2, 1, 2);
 						}
 						else {
@@ -599,22 +576,22 @@ void mainMenu(playerField* field1, playerField* field2)
 						}
 					}
 					break;
-				case 2:
+				case '2':
 					while (!exit) {
-						std::cout << "Choose difficult:" << std::endl;
-						std::cout << "1. Easy." << std::endl;
-						std::cout << "2. Hard." << std::endl;
-						std::cout << "0. Exit." << std::endl;
-						std::cin >> choice;
+						std::cout << "\n\n\n\n\n\n\n\n\n\n\t\t\t\t    Choose difficult:" << std::endl;
+						std::cout << "\t\t\t\t\t1. Easy." << std::endl;
+						std::cout << "\t\t\t\t\t2. Hard." << std::endl;
+						std::cout << "\t\t\t\t\t0. Exit." << std::endl;
+						choice = _getch();
 
 						switch (choice) {
-						case 1:
+						case '1':
 							game(field1, field2, 2, 0);
 							break;
-						case 2:
+						case '2':
 							game(field1, field2, 3, 0);
 							break;
-						case 0:
+						case '0':
 							exit = true;
 							break;
 						default:
@@ -623,7 +600,7 @@ void mainMenu(playerField* field1, playerField* field2)
 						}
 					}
 					break;
-				case 0:
+				case '0':
 					exit = true;
 					break;
 				default:
@@ -632,7 +609,7 @@ void mainMenu(playerField* field1, playerField* field2)
 				}
 			}
 			break;
-		case 0:
+		case '0':
 			exit = true;
 			break;
 		default:
@@ -756,7 +733,7 @@ bool checkShoot(playerField* field, int x, int y)
 
 void game(playerField* field1, playerField* field2, int gameMode, int fill)
 {
-
+	system("CLS");
 	//1 - игрок против игрока
 	//2 - игрок против ИИ простой
 	//3 - игрок протв ИИ сложный
@@ -790,7 +767,7 @@ void game(playerField* field1, playerField* field2, int gameMode, int fill)
 		while (checkEndOfGame(field1, field2)) {
 			while (true) {
 
-				std::cout << "\n\n\t\t\tPlayer 1" << std::endl;
+				std::cout << "\n\n\t\t    Player 1\t\t\t\t\t    Player 2" << std::endl << std::endl;
 				showFields(*(field1), *(field2));
 
 				std::cout << "Enter the x:";
@@ -813,11 +790,12 @@ void game(playerField* field1, playerField* field2, int gameMode, int fill)
 					}
 				}
 			}
+
 			system("CLS");
 
 			while (true) {
 
-				std::cout << "\n\n\t\t\tPlayer 2" << std::endl;
+				std::cout << "\n\n\t\t    Player 2\t\t\t\t\t    Player 1" << std::endl << std::endl;
 				showFields(*(field2), *(field1));
 
 				std::cout << "Enter the x:";
@@ -846,6 +824,7 @@ void game(playerField* field1, playerField* field2, int gameMode, int fill)
 	}
 	else if (gameMode == 2) {
 
+		std::cout << "\n\n\t\t    Player 1\t\t\t\t\t    Player 2" << std::endl << std::endl;
 		while (checkEndOfGame(field1, field2)) {
 			while (true) {
 				showFields(*(field1), *(field2));
@@ -872,12 +851,15 @@ void game(playerField* field1, playerField* field2, int gameMode, int fill)
 			}
 
 			system("CLS");
+
+			std::cout << "\n\n\t\t    Player 2\t\t\t\t\t    Player 1" << std::endl << std::endl;
 			while (enemyShotEasy(field1)) {
 				showFields(*(field1), *(field2));
 			}
 		}
 	}
 	else if (gameMode == 3) {
+		std::cout << "\n\n\t\t    Player 1\t\t\t\t\t    Player 2" << std::endl << std::endl;
 		while (checkEndOfGame(field1, field2)) {
 			while (true) {
 				showFields(*(field1), *(field2));
@@ -904,6 +886,7 @@ void game(playerField* field1, playerField* field2, int gameMode, int fill)
 			}
 
 			system("CLS");
+			std::cout << "\n\n\t\t    Player 2\t\t\t\t\t    Player 1" << std::endl << std::endl;
 			while (enemyShotHard(field1)) {
 				showFields(*(field1), *(field2));
 			}
