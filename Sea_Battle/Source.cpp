@@ -36,6 +36,8 @@ bool enemyShotHard(playerField*);	//	выстрел компьютера тяж�
 bool checkEndOfGame(playerField*, playerField*);
 bool checkShoot(playerField*, int, int);
 void game(playerField*, playerField*, int, int);
+void cursorPosition();
+int* cursorPosition2();
 
 
 //функция сильного ИИ
@@ -54,6 +56,9 @@ int main()
 	playerField* ptrField2 = &field2;
 
 	//intro();
+
+	//cursorPosition();
+	//cursorPosition2();
 
 	mainMenu(ptrField1, ptrField2);
 
@@ -184,10 +189,15 @@ void fillFieldManual(playerField* field1)
 		system("CLS");
 		std::cout << "Single-deck ship #" << field1->ship1 + 1 << std::endl;
 		showField(field1);
-		std::cout << "Enter the first coordinate X: ";
+		int * rep = { 0, };
+		//rep = cursorPosition2();
+		cursorPosition();
+		coordX = rep[0];
+		coordY = rep[1];
+		/*std::cout << "Enter the first coordinate X: ";
 		std::cin >> coordX;
 		std::cout << "Enter the second coordinate Y: ";
-		std::cin >> coordY;
+		std::cin >> coordY;*/
 		if (checkArea(field1, coordX, coordY)) {
 			field1->field[coordX][coordY] = '#';
 			field1->ship1++;
@@ -895,6 +905,62 @@ void game(playerField* field1, playerField* field2, int gameMode, int fill)
 	else {
 		std::cout << "Eternal error!";
 	}
+
+}
+
+void cursorPosition()
+{
+	POINT p;
+	RECT r;
+	int rep[2];
+	bool chrt = true;
+	while (chrt) {
+		GetWindowRect(GetConsoleWindow(), &r);
+		GetCursorPos(&p);
+
+		
+			
+			rep[0] = (p.x - r.left) / 10;
+			rep[1] = (p.y - r.top - 31) / 15;
+			if (GetAsyncKeyState(VK_LBUTTON))
+			{
+				chrt = false;
+				std::cout << p.x << "   " << p.y;
+			}
+			/*std::cout << "RIGHT: " << (GetAsyncKeyState(VK_RBUTTON) ? "YES" : "NO")
+				<< "\tLEFT: " << (GetAsyncKeyState(VK_LBUTTON) ? "YES" : "NO")
+				<< "\t[" << p.x << ";" << p.y << "]" << std::endl;*/
+		
+	}
+
+
+	
+}
+
+
+int* cursorPosition2()
+{
+	RECT r;
+	POINT p;
+	HWND wh = GetConsoleWindow();
+	COORD c = { 1,1 };
+	int rep[2];
+	bool chrt = true;
+	while (chrt) {
+		GetWindowRect(wh, &r);
+		GetCursorPos(&p);
+		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
+		std::cout << p.x - r.left << ":" << p.y - r.top - 31 << "    ";
+		
+		if ((GetAsyncKeyState(VK_LBUTTON) & 0x8000 != 0)) {
+			chrt = false;
+			rep[0] = (p.x - r.left) / 10;
+			rep[1] = (p.y - r.top - 31) / 15;
+			
+		}
+	}
+
+	return rep;
 
 }
 
