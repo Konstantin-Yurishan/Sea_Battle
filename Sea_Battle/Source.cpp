@@ -937,7 +937,6 @@ void cursorPosition()
 	
 }
 
-
 int* cursorPosition2()
 {
 	RECT r;
