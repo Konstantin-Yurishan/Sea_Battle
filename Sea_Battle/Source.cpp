@@ -1,3 +1,33 @@
+/*
+
+min:
+	игра компьютера против компьютера
+	сложный ИИ
+	остановка игры
+	приостановка игры
+	запуск новой игры
+	
+	----------
+	завершение музыки после интро
+	досрочное завершение интро после нажатия клавиши
+
+
+max:
+	сохранение и загрузка игры (сохранение в текстовый файл)
+	ввод координат кораблей с помощью курсора мыши
+	ввод имён игроков
+	статистика в меню запроса хода:
+		остаток своих кораблей
+		остаток вражеских кораблей
+
+
+	??? хранение кораблей в виде: координата начала / координата конца / количество палуб / поражённые палубы / потоплен или нет
+
+*/
+
+
+
+
 #include <iostream>
 #include <string>
 #include <Windows.h>
@@ -36,19 +66,7 @@ bool checkEndOfGame(playerField*, playerField*);
 bool checkShoot(playerField*, int, int);
 void game(playerField*, playerField*, int, int);
 void voice(int); 
-void cursorPosition();
-int* cursorPosition2();
 int* coordinateModifer(std::string);
-
-
-//функция сильного ИИ
-//завершение музыки при завершении интро
-//досрочное завершение интро
-//воод координат одной строкой
-//вывод имени игрока в ручной расстановке
-
-
-
 
 int main()
 {
@@ -488,7 +506,7 @@ void fillFieldAutomatic(playerField* field1)
 void intro()
 {
 	std::thread thr(musicThread);
-	thr.detach();
+	thr.join();
 	
 
 
@@ -515,6 +533,8 @@ void intro()
 
 	for (int i = 0; i < 10; i++) {
 
+		
+
 		for (auto str : logo) {
 
 			SetConsoleTextAttribute(hConsole, rand() % 15 + 1);
@@ -530,6 +550,8 @@ void intro()
 		system("CLS");
 
 	}
+	
+
 	return;
 }
 
@@ -564,7 +586,7 @@ void consoleSize()
 
 void mainMenu(playerField* field1, playerField* field2)
 {
-	//intro();
+	intro();
 	char choice;
 	bool exit = false;
 
@@ -1126,10 +1148,11 @@ int* cursorPosition2()
 
 }
 
+
+//TODO возможность приёма координат в дополнение к виду (F5) - 5 F, F 5, 5F, f F
+
 int* coordinateModifer(std::string coord)
 {
-	//F5 F10 D3 -> x - 5 y - 4 
-	//буква y
 	int X, Y;
 	int* ret = new int[2];
 
