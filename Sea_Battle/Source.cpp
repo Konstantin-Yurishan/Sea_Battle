@@ -38,11 +38,17 @@ void game(playerField*, playerField*, int, int);
 void voice(int); 
 void cursorPosition();
 int* cursorPosition2();
+int* coordinateModifer(std::string);
 
 
 //функция сильного ИИ
-//подбитые корабли - красный, корабли - зелёный, область промаха - белый
-//
+//завершение музыки при завершении интро
+//досрочное завершение интро
+//воод координат одной строкой
+//вывод имени игрока в ручной расстановке
+
+
+
 
 int main()
 {
@@ -55,10 +61,6 @@ int main()
 	playerField field2 = createPlayerField();
 	playerField* ptrField2 = &field2;
 
-	intro();
-
-	//cursorPosition();
-	//cursorPosition2();
 
 	mainMenu(ptrField1, ptrField2);
 
@@ -181,29 +183,32 @@ void showFields(playerField field1, playerField field2)
 
 //заполнение поля в ручном режиме
 void fillFieldManual(playerField* field1)
-{
+{   
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	int coordX, coordY, dir, finishX, finishY;
+	std::string coord;
+	int *coordXY = new int();
 	//однопалубные
+
 	while (field1->ship1 != 4) {
 		system("CLS");
 		std::cout << "Single-deck ship #" << field1->ship1 + 1 << std::endl;
 		showField(field1);
-		int * rep = { 0, };
-		//rep = cursorPosition2();
-		cursorPosition();
-		coordX = rep[0];
-		coordY = rep[1];
-		/*std::cout << "Enter the first coordinate X: ";
-		std::cin >> coordX;
-		std::cout << "Enter the second coordinate Y: ";
-		std::cin >> coordY;*/
+		std::cout << "Enter the coordinate: ";
+		std::cin >> coord;
+
+		coordXY = coordinateModifer(coord);
+
+		coordX = coordXY[0];
+		coordY = coordXY[1];
+
 		if (checkArea(field1, coordX, coordY)) {
 			field1->field[coordX][coordY] = '#';
 			field1->ship1++;
 		}
 		else {
 			std::cout << "Input error!" << std::endl;
+			Sleep(1000);
 		}
 	}
 	
@@ -213,15 +218,17 @@ void fillFieldManual(playerField* field1)
 		system("CLS");
 		std::cout << "Double-deck ship #" << field1->ship2 + 1 << std::endl;
 		showField(field1);
-		std::cout << "Enter the start coordinate X: ";
-		std::cin >> coordX;
-		std::cout << "Enter the start coordinate Y: ";
-		std::cin >> coordY;
 
-		std::cout << "Enter the finish coordinate X: ";
-		std::cin >> finishX;
-		std::cout << "Enter the finish coordinate Y: ";
-		std::cin >> finishY;
+		std::cout << "Enter the start coordinate: ";
+		std::cin >> coord;
+		coordXY = coordinateModifer(coord);
+		coordX = coordXY[0];
+		coordY = coordXY[1];
+		std::cout << "Enter the finish coordinate: ";
+		std::cin >> coord;
+		coordXY = coordinateModifer(coord);
+		finishX = coordXY[0];
+		finishY = coordXY[1];
 
 		if ((abs(coordX - finishX) == 1 || abs(coordY - finishY) == 1) && !(abs(coordX - finishX) == 1 && abs(coordY - finishY)==1)) {
 			if (checkArea(field1, coordX, coordY) && checkArea(field1, finishX, finishY)) {
@@ -231,10 +238,12 @@ void fillFieldManual(playerField* field1)
 			}
 			else {
 				std::cout << "Point is not clear." << std::endl;
+				Sleep(1000);
 			}
 		}
 		else {
 			std::cout << "Input error!" << std::endl;
+			Sleep(1000);
 		}
 		
 	}
@@ -245,15 +254,18 @@ void fillFieldManual(playerField* field1)
 		system("CLS");
 		std::cout << "Triple-deck ship #" << field1->ship3 + 1 << std::endl;
 		showField(field1);
-		std::cout << "Enter the start coordinate X: ";
-		std::cin >> coordX;
-		std::cout << "Enter the start coordinate Y: ";
-		std::cin >> coordY;
 
-		std::cout << "Enter the finish coordinate X: ";
-		std::cin >> finishX;
-		std::cout << "Enter the finish coordinate Y: ";
-		std::cin >> finishY;
+		std::cout << "Enter the start coordinate: ";
+		std::cin >> coord;
+		coordXY = coordinateModifer(coord);
+		coordX = coordXY[0];
+		coordY = coordXY[1];
+
+		std::cout << "Enter the finish coordinate: ";
+		std::cin >> coord;
+		coordXY = coordinateModifer(coord);
+		finishX = coordXY[0];
+		finishY = coordXY[1];
 
 		if ((abs(coordX - finishX) == 2 || abs(coordY - finishY) == 2) && !(abs(coordX - finishX) == 2 && abs(coordY - finishY) == 2)) {
 			if (checkArea(field1, coordX, coordY) && checkArea(field1, finishX, finishY) && checkArea(field1, coordX + (abs(coordX - finishX) == 2 ? 1 : 0), coordY + (abs(coordX - finishX) == 2 ? 1 : 0))) {
@@ -264,10 +276,12 @@ void fillFieldManual(playerField* field1)
 			}
 			else {
 				std::cout << "Point is not clear." << std::endl;
+				Sleep(1000);
 			}
 		}
 		else {
 			std::cout << "Input error!" << std::endl;
+			Sleep(1000);
 		}
 
 	}
@@ -278,15 +292,18 @@ void fillFieldManual(playerField* field1)
 		system("CLS");
 		std::cout << "Four-deck ship #" << field1->ship4 + 1 << std::endl;
 		showField(field1);
-		std::cout << "Enter the start coordinate X: ";
-		std::cin >> coordX;
-		std::cout << "Enter the start coordinate Y: ";
-		std::cin >> coordY;
 
-		std::cout << "Enter the finish coordinate X: ";
-		std::cin >> finishX;
-		std::cout << "Enter the finish coordinate Y: ";
-		std::cin >> finishY;
+		std::cout << "Enter the start coordinate: ";
+		std::cin >> coord;
+		coordXY = coordinateModifer(coord);
+		coordX = coordXY[0];
+		coordY = coordXY[1];
+
+		std::cout << "Enter the finish coordinate: ";
+		std::cin >> coord;
+		coordXY = coordinateModifer(coord);
+		finishX = coordXY[0];
+		finishY = coordXY[1];
 
 		if ((abs(coordX - finishX) == 3 || abs(coordY - finishY) == 3) && !(abs(coordX - finishX) == 3 && abs(coordY - finishY) == 3)) {
 			if (checkArea(field1, coordX, coordY) && checkArea(field1, finishX, finishY) && checkArea(field1, coordX + (abs(coordX - finishX) == 3 ? 1 : 0), coordY + (abs(coordX - finishX) == 3 ? 1 : 0)) && checkArea(field1, coordX + (abs(coordX - finishX) == 3 ? 2 : 1), coordY + (abs(coordX - finishX) == 3 ? 2 : 1))) {
@@ -471,7 +488,7 @@ void fillFieldAutomatic(playerField* field1)
 void intro()
 {
 	std::thread thr(musicThread);
-	thr.join();
+	thr.detach();
 	
 
 
@@ -509,7 +526,6 @@ void intro()
 
 		std::cout << "\n\n\t\t\t\tGame will start untill " << 10 - i << " sec.";  // всё ещё работаю над этим
 		
-
 		Sleep(1000);
 		system("CLS");
 
@@ -548,7 +564,7 @@ void consoleSize()
 
 void mainMenu(playerField* field1, playerField* field2)
 {
-
+	//intro();
 	char choice;
 	bool exit = false;
 
@@ -782,9 +798,6 @@ void game(playerField* field1, playerField* field2, int gameMode, int fill)
 		
 	}
 
-
-
-
 	if (gameMode == 1) {
 
 		while (checkEndOfGame(field1, field2)) {
@@ -960,6 +973,28 @@ void game(playerField* field1, playerField* field2, int gameMode, int fill)
 		std::cout << "Eternal error!";
 	}
 
+
+	if (field1->sumOfShipsDecks == 0) {
+		if (gameMode == 2 || gameMode == 3) {
+			std::cout << "You luse! Shame of you!" << std::endl;
+		}
+		else {
+			std::cout << "Player 2 win!" << std::endl;
+		}
+	}
+	else if (field2->sumOfShipsDecks == 0) {
+		if (gameMode == 2 || gameMode == 3) {
+			std::cout << "You win!" << std::endl;
+		}
+		else {
+			std::cout << "Player 1 win!" << std::endl;
+		}
+	}
+
+
+
+
+
 }
 
 void voice(int var)
@@ -1089,6 +1124,29 @@ int* cursorPosition2()
 
 	return rep;
 
+}
+
+int* coordinateModifer(std::string coord)
+{
+	//F5 F10 D3 -> x - 5 y - 4 
+	//буква y
+	int X, Y;
+	int* ret = new int[2];
+
+	if (coord.length() == 3 && coord.at(1) == '1' && coord.at(2) == '0') {
+		X = 9;
+		Y = coord.at(0) - 65;
+	}
+	else {
+		X = coord.at(1) - 49;
+		Y = coord.at(0) - 65;
+	}
+
+
+	ret[0] = X;
+	ret[1] = Y;
+
+	return ret;
 }
 
 
