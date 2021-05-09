@@ -214,7 +214,7 @@ void fillFieldManual(playerField* field1)
 		showField(field1);
 		std::cout << "Enter the coordinate: ";
 		std::cin >> coord;
-
+		//если недостаточно координаты (1 координата вместо вида F5
 		coordXY = coordinateModifer(coord);
 
 		coordX = coordXY[0];
@@ -897,9 +897,7 @@ void game(playerField* field1, playerField* field2, int gameMode, int fill)
 					}
 				}
 			}
-
 		}
-
 	}
 	else if (gameMode == 2) {
 
