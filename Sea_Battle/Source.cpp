@@ -35,11 +35,6 @@ max:
 
 */
 
-
-
-
-
-
 #include <iostream>
 #include <string>
 #include <Windows.h>
@@ -48,15 +43,12 @@ max:
 #pragma comment(lib, "winmm.lib")
 
 struct playerField {
-
 	int ship1 = 0;
 	int ship2 = 0;
 	int ship3 = 0;
 	int ship4 = 0;
 	int sumOfShipsDecks = 20;
-
 	char** field;
-
 };
 
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -67,10 +59,8 @@ void showFields(playerField, playerField);	//	показ игровых поле
 void fillFieldManual(playerField*);	//	заполнение поля в ручном режиме
 void fillFieldAutomatic(playerField*);	//	заполнение поля в автоматическом режиме
 void intro();	//	интро в начале игры
-void musicThread();	//	поток для проигрывания музыки в интро
 void consoleSize();	//	изменение размера окна консоли
 void mainMenu(playerField*, playerField*);	//	главное меню программы
-void errorPrinter(int);	//	выводит ошибку согласно переданому числу
 bool checkArea(playerField*, int, int);
 bool enemyShotEasy(playerField*);	//	выстрел компьютера
 bool enemyShotHard(playerField*);	//	выстрел компьютера тяжелый
@@ -78,8 +68,6 @@ bool checkEndOfGame(playerField*, playerField*);
 bool checkShoot(playerField*, int, int);
 void game(playerField*, playerField*, int, int);
 void voice(int); 
-void cursorPosition();
-int* cursorPosition2();
 int* coordinateModifer(std::string);
 
 
@@ -93,7 +81,6 @@ int main()
 	playerField* ptrField1 = &field1;
 	playerField field2 = createPlayerField();
 	playerField* ptrField2 = &field2;
-
 
 	mainMenu(ptrField1, ptrField2);
 
@@ -121,26 +108,36 @@ playerField createPlayerField()
 
 void showField(playerField* field)
 {
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	std::cout << "  A  B  C  D  E  F  G  H  I  J" << std::endl;
+	//HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	std::cout << "\t  A  B  C  D  E  F  G  H  I  J " << std::endl;
+
 	for (int i = 0; i < 10; i++) {
-		std::cout << i + 1;
+
+		std::cout << "\t" << i + 1;
+
 		if (i != 9) std::cout << " ";
 
 		for (int c = 0; c < 10; c++) {
+
 			if (field->field[i][c] == '#') {
+
 				SetConsoleTextAttribute(hConsole, 10);
 				std::cout << field->field[i][c];
-				SetConsoleTextAttribute(hConsole, 7);
+
 			}
 			else if (field->field[i][c] == '~') {
+
 				SetConsoleTextAttribute(hConsole, 9);
 				std::cout << field->field[i][c];
-				SetConsoleTextAttribute(hConsole, 7);
+
 			}
+
 			SetConsoleTextAttribute(hConsole, 7);
+
 			std::cout << "  ";
 		}
+
 		std::cout << std::endl << std::endl;
 
 		SetConsoleTextAttribute(hConsole, 7);
@@ -150,51 +147,72 @@ void showField(playerField* field)
 //показ обоих полей
 void showFields(playerField field1, playerField field2)
 {
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);//для манип с конс выводом в данном случае раскраска
+	//HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);//для манип с конс выводом в данном случае раскраска
 
 	std::cout << "\t  A  B  C  D  E  F  G  H  I  J \t\t\t  A  B  C  D  E  F  G  H  I  J " << std::endl;
+
 	for (int i = 0; i < 10; i++) {
+
 		std::cout << "\t" << i + 1;
+
 		if (i != 9) std::cout << " ";
 
-
 		for (int c = 0; c < 10; c++) {
+
 			if (field1.field[i][c] == '#') {
+
 				SetConsoleTextAttribute(hConsole, 10);
 				std::cout << field1.field[i][c];
+
 			}
 			else if (field1.field[i][c] == '~') {
+
 				SetConsoleTextAttribute(hConsole, 9);
 				std::cout << field1.field[i][c];
+
 			}
 			else if (field1.field[i][c] == 'X') {
+
 				SetConsoleTextAttribute(hConsole, 4);
 				std::cout << field1.field[i][c];
+
 			}
 			else if (field1.field[i][c] == '0') {
+
 				SetConsoleTextAttribute(hConsole, 9);
 				std::cout << '~';
+
 			}
+
 			SetConsoleTextAttribute(hConsole, 7);
+
 			std::cout << "  ";
+
 		}
 
-		std::cout << "\t";
-		std::cout << "\t" << i + 1;
+		std::cout << "\t\t" << i + 1;
+
 		if (i != 9) std::cout << " ";
 
 		for (int c = 0; c < 10; c++) {
+
 			if (field2.field[i][c] == 'X') {
+
 				SetConsoleTextAttribute(hConsole, 4);
 				std::cout << field2.field[i][c];
+
 			}
 			else if (field2.field[i][c] == '0') {
+
 				SetConsoleTextAttribute(hConsole, 9);
 				std::cout << field2.field[i][c];
+
 			}
 			else if (field2.field[i][c] == '~' || field2.field[i][c] == '#') {
+
 				SetConsoleTextAttribute(hConsole, 9);
 				std::cout << '/';
+
 			}
 			
 			SetConsoleTextAttribute(hConsole, 7);
@@ -204,6 +222,7 @@ void showFields(playerField field1, playerField field2)
 		std::cout << std::endl << std::endl;
 
 		SetConsoleTextAttribute(hConsole, 7);
+
 	}
 
 	//	TODO вывод информации по количеству кораблей
@@ -214,10 +233,11 @@ void showFields(playerField field1, playerField field2)
 
 }
 //ошибка при вводе не полный координат
+// выход за пределы координат
 //заполнение поля в ручном режиме
 void fillFieldManual(playerField* field1)
 {   
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	//HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	int coordX, coordY, dir, finishX, finishY;
 	std::string coord;
 	int *coordXY = new int();
@@ -225,7 +245,7 @@ void fillFieldManual(playerField* field1)
 
 	while (field1->ship1 != 4) {
 		system("CLS");
-		std::cout << "Single-deck ship #" << field1->ship1 + 1 << std::endl;
+		std::cout << "\t\tSingle-deck ship #" << field1->ship1 + 1 << std::endl;
 		showField(field1);
 		std::cout << "Enter the coordinate: ";
 		std::cin >> coord;
@@ -249,7 +269,7 @@ void fillFieldManual(playerField* field1)
 	//двухпалубные
 	while (field1->ship2 != 3) {
 		system("CLS");
-		std::cout << "Double-deck ship #" << field1->ship2 + 1 << std::endl;
+		std::cout << "\t\tDouble-deck ship #" << field1->ship2 + 1 << std::endl;
 		showField(field1);
 
 		std::cout << "Enter the start coordinate: ";
@@ -285,7 +305,7 @@ void fillFieldManual(playerField* field1)
 	//трёхпалубные
 	while (field1->ship3 != 2) {
 		system("CLS");
-		std::cout << "Triple-deck ship #" << field1->ship3 + 1 << std::endl;
+		std::cout << "\t\tTriple-deck ship #" << field1->ship3 + 1 << std::endl;
 		showField(field1);
 
 		std::cout << "Enter the start coordinate: ";
@@ -323,7 +343,7 @@ void fillFieldManual(playerField* field1)
 	//четёрехпалубный
 	while (field1->ship4 != 1) {
 		system("CLS");
-		std::cout << "Four-deck ship #" << field1->ship4 + 1 << std::endl;
+		std::cout << "\t\tFour-deck ship #" << field1->ship4 + 1 << std::endl;
 		showField(field1);
 
 		std::cout << "Enter the start coordinate: ";
@@ -517,14 +537,11 @@ void fillFieldAutomatic(playerField* field1)
 	}
 }
 
-//TODO сделать прерывание при нажатии любой клавиши
 void intro()
 {
-	std::thread thr(musicThread);
-	thr.detach();
+
+	PlaySound(TEXT("musica\\intro.wav"), NULL, SND_FILENAME | SND_ASYNC);
 	
-
-
 	std::string logo[19] = { "\n\n                               $$$$$$$$\\ $$$$$$$\\ $$$$$$\\  $$$$$$\\                              ",
 							"                               $$  _____|$$  __$$\\\\_$$  _|$$  __$$\\                             ",
 							"                               $$ |      $$ |  $$ | $$ |  $$ /  \\__|                            ",
@@ -545,7 +562,6 @@ void intro()
 							" \\$$$$$$  |$$$$$$$$\\ $$ |  $$ |      $$$$$$$  |$$ |  $$ |  $$ |      $$ |   $$$$$$$$\\ $$$$$$$$\\ ",
 							"  \\______/ \\________|\\__|  \\__|      \\_______/ \\__|  \\__|  \\__|      \\__|   \\________|\\________|" };
 
-
 	for (int i = 0; i < 10; i++) {
 
 		for (auto str : logo) {
@@ -557,18 +573,13 @@ void intro()
 
 		SetConsoleTextAttribute(hConsole, 7);
 
-		std::cout << "\n\n\t\t\t\tGame will start untill " << 10 - i << " sec.";  // всё ещё работаю над этим
+		std::cout << "\n\n\t\t\t\tGame will start untill " << 10 - i << " sec.";
 		
 		Sleep(1000);
 		system("CLS");
 
 	}
 	return;
-}
-
-void musicThread()
-{
-	PlaySound(TEXT("musica\\intro.wav"), NULL, SND_FILENAME | SND_ASYNC);
 }
 
 //меняет размер окна консоли при запуске
@@ -598,7 +609,7 @@ void consoleSize()
 void mainMenu(playerField* field1, playerField* field2)
 {
 	//добавить возможность возвращения назад в меню
-	//intro();
+	intro();
 	char choice;
 	bool exit = false;
 
@@ -656,7 +667,7 @@ void mainMenu(playerField* field1, playerField* field2)
 							exit = true;
 							break;
 						default:
-							errorPrinter(1);
+							std::cout << "Enter the correct menu point." << std::endl;
 							break;
 						}
 					}
@@ -665,7 +676,7 @@ void mainMenu(playerField* field1, playerField* field2)
 					exit = true;
 					break;
 				default:
-					errorPrinter(1);
+					std::cout << "Enter the correct menu point." << std::endl;
 					break;
 				}
 			}
@@ -674,28 +685,11 @@ void mainMenu(playerField* field1, playerField* field2)
 			exit = true;
 			break;
 		default:
-			errorPrinter(1);
+			std::cout << "Enter the correct menu point." << std::endl;
 			break;
 		}
 	}
 
-}
-
-void errorPrinter(int e)
-{
-
-	SetConsoleTextAttribute(hConsole, 4);
-
-	switch (e) {
-	case 1:
-		std::cout << "Enter the correct menu point." << std::endl;
-		break;
-	default:
-		std::cout << "Unknown error code." << std::endl;
-		break;
-	}
-
-	SetConsoleTextAttribute(hConsole, 7);
 }
 
 bool checkArea(playerField* field, int X, int Y)
@@ -715,7 +709,7 @@ bool checkArea(playerField* field, int X, int Y)
 
 bool enemyShotEasy(playerField* field)
 {
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	//HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
 	int x = rand() % 10;
 	int y = rand() % 10;
@@ -743,8 +737,6 @@ bool enemyShotEasy(playerField* field)
 		system("CLS");
 		return false;
 	}
-
-
 
 }
 
@@ -1008,7 +1000,6 @@ void game(playerField* field1, playerField* field2, int gameMode, int fill)
 		std::cout << "Eternal error!";
 	}
 
-
 	if (field1->sumOfShipsDecks == 0) {
 		if (gameMode == 2 || gameMode == 3) {
 			std::cout << "You luse! Shame of you!" << std::endl;
@@ -1025,10 +1016,6 @@ void game(playerField* field1, playerField* field2, int gameMode, int fill)
 			std::cout << "Player 1 win!" << std::endl;
 		}
 	}
-
-
-
-
 
 }
 
@@ -1107,58 +1094,6 @@ void voice(int var)
 		}
 	}
 	
-}
-
-void cursorPosition()
-{
-	POINT p;
-	RECT r;
-
-	bool chrt = true;
-	while (chrt) {
-		GetWindowRect(GetConsoleWindow(), &r);
-		GetCursorPos(&p);
-
-			if (GetAsyncKeyState(VK_LBUTTON))
-			{
-				chrt = false;
-				std::cout << p.x << "   " << p.y;
-			}
-			/*std::cout << "RIGHT: " << (GetAsyncKeyState(VK_RBUTTON) ? "YES" : "NO")
-				<< "\tLEFT: " << (GetAsyncKeyState(VK_LBUTTON) ? "YES" : "NO")
-				<< "\t[" << p.x << ";" << p.y << "]" << std::endl;*/
-		
-	}
-
-
-	
-}
-
-int* cursorPosition2()
-{
-	RECT r;
-	POINT p;
-	HWND wh = GetConsoleWindow();
-	COORD c = { 1,1 };
-	int rep[2];
-	bool chrt = true;
-	while (chrt) {
-		GetWindowRect(wh, &r);
-		GetCursorPos(&p);
-		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
-		std::cout << p.x - r.left << ":" << p.y - r.top - 31 << "    ";
-		
-		if ((GetAsyncKeyState(VK_LBUTTON) & 0x8000 != 0)) {
-			chrt = false;
-			rep[0] = (p.x - r.left) / 10;
-			rep[1] = (p.y - r.top - 31) / 15;
-			
-		}
-	}
-
-
-	return rep;
-
 }
 
 int* coordinateModifer(std::string coord)
